@@ -38,7 +38,7 @@ PRISMA NESTJS
     to a local file which in this case is called dev.db
 
 ------------------------------------------------------------------------------------------------
-GITHUB | OPTIONAL
+GITHUB | OPTION 1
 ------------------------------------------------------------------------------------------------
 git init
 git add README.md
@@ -48,7 +48,7 @@ git remote add origin https://github.com/my-store/upk.git
 git push -u origin main
 
 ------------------------------------------------------------------------------------------------
-GITHUB | IMPORTANT
+GITHUB | OPTION 2
 ------------------------------------------------------------------------------------------------
 git remote add origin https://github.com/my-store/upk.git
 git branch -M main
