@@ -1,0 +1,311 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  // provider = "postgresql"
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id        Int      @id @default(autoincrement())
+  nama      String
+  tlp       String   @unique
+  password  String
+  foto      String   @default("") // URL foto
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // RelatiChild tables
+  User                 User[]
+  BankOperasionalBkk   BankOperasionalBkk[]
+  KasOperasional       KasOperasional[]
+  BankBriMd            BankBriMd[]
+  ModalDesa            ModalDesa[]
+  KasModalDesa         KasModalDesa[]
+  RekonsiliasiRekening RekonsiliasiRekening[]
+  KasSpp               KasSpp[]
+  BankSppBrebes        BankSppBrebes[]
+  BankSppJateng        BankSppJateng[]
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  nama      String
+  tlp       String   @unique
+  password  String
+  foto      String   @default("") // URL foto
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Parent table
+  Admin   Admin? @relation(fields: [adminId], references: [id])
+  adminId Int?
+
+  // Child tables
+  BankOperasionalBkk   BankOperasionalBkk[]
+  KasOperasional       KasOperasional[]
+  BankBriMd            BankBriMd[]
+  ModalDesa            ModalDesa[]
+  KasModalDesa         KasModalDesa[]
+  RekonsiliasiRekening RekonsiliasiRekening[]
+  KasSpp               KasSpp[]
+  BankSppBrebes        BankSppBrebes[]
+  BankSppJateng        BankSppJateng[]
+}
+
+model BankOperasionalBkk {
+  id             Int      @id @default(autoincrement())
+  keterangan     String
+  tipe           String // Tarik atau Setor
+  buktiTransaksi String? // Berisi URL foto (SOON)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Parent table (who create or change this data)
+  Admin   Admin? @relation(fields: [adminId], references: [id])
+  adminId Int?
+  User    User?  @relation(fields: [userId], references: [id])
+  userId  Int?
+
+  // Pemasukan
+  pmkSetorRekDo Int
+  pmkBunga      Int
+
+  // Pengeluaran
+  pglTarikRekDo Int
+  pglPajakBank  Int
+  pglAdmBank    Int
+
+  // Dibawah ini, beberapa kolom yang perlu dipertanyakan fungsinya
+  saldoRekDo        Int?
+  ketSaldoAwalTahun Int?
+}
+
+model KasOperasional {
+  id             Int      @id @default(autoincrement())
+  keterangan     String
+  tipe           String // Tarik atau Setor
+  buktiTransaksi String? // Berisi URL foto (SOON)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Parent table (who create or change this data)
+  Admin   Admin? @relation(fields: [adminId], references: [id])
+  adminId Int?
+  User    User?  @relation(fields: [userId], references: [id])
+  userId  Int?
+
+  // Pemasukan
+  pmkRekSppUep  Int
+  pmkTarikRekDo Int
+  pmkLain       Int // Pendapatan atau pemasukan lain-lain
+
+  // Pengeluaran
+  pglSetorRekDo Int
+  pglHonor      Int
+  pglAdmUmum    Int
+  pglTransport  Int
+  pglLain       Int // Pengeluaran lain-lain
+
+  // Biaya lain-lain non operasional
+  blnoUnitUsaha  Int
+  blnoGedung     Int
+  blnoInventaris Int
+  blnoLain       Int // Biaya non operasional lain-lain
+
+  // Dibawah ini, beberapa kolom yang perlu dipertanyakan fungsinya
+  saldoKasOperasional Int?
+}
+
+model BankBriMd {
+  id             Int      @id @default(autoincrement())
+  keterangan     String
+  tipe           String // Tarik atau Setor
+  buktiTransaksi String? // Berisi URL foto (SOON)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Parent table (who create or change this data)
+  Admin   Admin? @relation(fields: [adminId], references: [id])
+  adminId Int?
+  User    User?  @relation(fields: [userId], references: [id])
+  userId  Int?
+
+  // Pemasukan
+  pmkSetorRekBumdesmaUpk Int
+  pmkBunga               Int
+
+  // Pengeluaran
+  pglTarikRekBumdesmaUpk Int
+  pglPajakTab            Int
+  pglAdmBank             Int
+
+  // Dibawah ini, beberapa kolom yang perlu dipertanyakan fungsinya
+  saldoRekBumdesmaUpk Int?
+  ketSaldoAwalTahun   Int?
+}
+
+model ModalDesa {
+  id             Int      @id @default(autoincrement())
+  keterangan     String
+  buktiTransaksi String? // Berisi URL foto (SOON)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Parent table (who create or change this data)
+  Admin   Admin? @relation(fields: [adminId], references: [id])
+  adminId Int?
+  User    User?  @relation(fields: [userId], references: [id])
+  userId  Int?
+
+  // Penyertaan modal desa
+  tipe      String // Tarik atau Setor
+  pmdJumlah Int // Nilai ini akan otomatis ditampilkan sesuai tipe nya (Tarik atau Setor)
+
+  // Dibawah ini, beberapa kolom yang perlu dipertanyakan fungsinya
+  saldo Int?
+}
+
+model KasModalDesa {
+  id             Int      @id @default(autoincrement())
+  keterangan     String
+  buktiTransaksi String? // Berisi URL foto (SOON)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Parent table (who create or change this data)
+  Admin   Admin? @relation(fields: [adminId], references: [id])
+  adminId Int?
+  User    User?  @relation(fields: [userId], references: [id])
+  userId  Int?
+
+  // Pemasukan
+  pmkKas                    Int
+  pmkTransferRekBumdesmaUpk Int
+  pmkTarikRekBumdesmaUpk    Int
+
+  // Pengeluaran
+  pglSetorRekBumdesmaUpk Int
+  pglUnitUsahaTokoPupuk  Int // Unit usaha toko pupuk
+  pglUnitUsahaLain       Int // Unit usaha lainnya
+
+  // Dibawah ini, beberapa kolom yang perlu dipertanyakan fungsinya
+  saldoKas Int?
+}
+
+model RekonsiliasiRekening {
+  id         Int      @id @default(autoincrement())
+  dana       String // Jenis dana (DO UPK, SPP, UEP dll)
+  noRek      Int
+  keterangan String // Jenis/ nama bank
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Parent table (who create or change this data)
+  Admin   Admin? @relation(fields: [adminId], references: [id])
+  adminId Int?
+  User    User?  @relation(fields: [userId], references: [id])
+  userId  Int?
+
+  // Dibawah ini, beberapa kolom yang perlu dipertanyakan fungsinya
+  tanggalSaldo       Int?
+  saldoBank          Int?
+  bungaPajakAdm      Int?
+  saldoNetto         Int?
+  totalPenerimaan    Int?
+  totalPenggunaan    Int?
+  sisaDanaSeharusnya Int?
+  cashOnHand         Int?
+  selisihDana        Int?
+}
+
+model KasSpp {
+  id             Int      @id @default(autoincrement())
+  keterangan     String
+  buktiTransaksi String? // Berisi URL foto (SOON)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Parent table (who create or change this data)
+  Admin   Admin? @relation(fields: [adminId], references: [id])
+  adminId Int?
+  User    User?  @relation(fields: [userId], references: [id])
+  userId  Int?
+
+  // Pemasukan
+  pmkPokok       Int
+  pmkJasa        Int
+  pmkLain        Int
+  pmkTarikRekSpp Int
+
+  // Pengeluaran
+  pglSetorRekSpp    Int
+  pglPerguliranSpp  Int
+  pglOperasionalUpk Int
+
+  // Dibawah ini, beberapa kolom yang perlu dipertanyakan fungsinya
+  saldoKasSpp Int?
+}
+
+model BankSppBrebes {
+  id             Int      @id @default(autoincrement())
+  keterangan     String
+  buktiTransaksi String? // Berisi URL foto (SOON)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Parent table (who create or change this data)
+  Admin   Admin? @relation(fields: [adminId], references: [id])
+  adminId Int?
+  User    User?  @relation(fields: [userId], references: [id])
+  userId  Int?
+
+  // Pemasukan
+  pmkSetorRekSpp Int
+  pmkBunga       Int
+
+  // Pengeluaran
+  pglTarikRekSpp   Int
+  pglPajakTabungan Int
+  pglAdmBank       Int
+
+  // Dibawah ini, beberapa kolom yang perlu dipertanyakan fungsinya
+  saldoRekSpp       Int?
+  ketSaldoAwalTahun Int?
+}
+
+model BankSppJateng {
+  id             Int      @id @default(autoincrement())
+  keterangan     String
+  buktiTransaksi String? // Berisi URL foto (SOON)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Parent table (who create or change this data)
+  Admin   Admin? @relation(fields: [adminId], references: [id])
+  adminId Int?
+  User    User?  @relation(fields: [userId], references: [id])
+  userId  Int?
+
+  // Pemasukan
+  pmkSetorRekSpp Int
+  pmkBunga       Int
+
+  // Pengeluaran
+  pglTarikRekSpp Int
+  pglPajakBank   Int
+  pglAdmBank     Int
+
+  // Dibawah ini, beberapa kolom yang perlu dipertanyakan fungsinya
+  saldoRekSpp       Int?
+  ketSaldoAwalTahun Int?
+}

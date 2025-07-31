@@ -1,0 +1,20 @@
+# ROOT
+node_modules
+.turbo
+
+# API
+apps/api/prisma/migrations
+apps/api/generated/prisma
+apps/api/public/img/admin
+apps/api/public/img/user
+apps/api/prisma/dev.db
+apps/api/node_modules
+apps/api/.turbo
+apps/api/dist
+apps/api/test
+apps/api/.env
+
+# CLIENT
+apps/client/node_modules
+apps/client/.turbo
+apps/client/dist

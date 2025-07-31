@@ -1,0 +1,55 @@
+------------------------------------------------------------------------------------------------
+PRISMA NESTJS
+------------------------------------------------------------------------------------------------
+    1. Start by installing the Prisma CLI as a development dependency in your project:
+        $ npm i -D prisma
+
+    2. In the following steps, we'll be utilizing the Prisma CLI. As a best practice,
+    it's recommended to invoke the CLI locally by prefixing it with npx:
+        $ npx prisma
+
+    3. Now create your initial Prisma setup using the init command of the Prisma CLI:
+        $ npx prisma init
+
+    4. This command creates a new prisma directory with the following contents:
+    schema.prisma:
+        Specifies your database connection and contains the database schema
+    .env:
+        A dotenv file, typically used to store your database credentials
+        in a group of environment variables.
+
+    5. Set the database connection
+    Your database connection is configured in the datasource block in your schema.prisma file.
+    By default it's set to postgresql, but since you're using a SQLite database
+    in this guide you need to adjust the provider field of the datasource block to sqlite:
+        datasource db {
+            provider = "sqlite"
+            url      = env("DATABASE_URL")
+        }
+        generator client {
+            provider = "prisma-client-js"
+        }
+    Now, open up .env and adjust the DATABASE_URL environment variable to look as follows:
+        DATABASE_URL="file:./dev.db"
+    Make sure you have a ConfigModule configured, otherwise the DATABASE_URL variable
+    will not be picked up from .env.
+    SQLite databases are simple files, no server is required to use a SQLite database.
+    So instead of configuring a connection URL with a host and port, you can just point it
+    to a local file which in this case is called dev.db
+
+------------------------------------------------------------------------------------------------
+GITHUB | OPTIONAL
+------------------------------------------------------------------------------------------------
+git init
+git add README.md
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/my-store/upk.git
+git push -u origin main
+
+------------------------------------------------------------------------------------------------
+GITHUB | IMPORTANT
+------------------------------------------------------------------------------------------------
+git remote add origin https://github.com/my-store/upk.git
+git branch -M main
+git push -u origin main

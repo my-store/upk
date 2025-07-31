@@ -1,0 +1,39 @@
+{
+  "name": "permata-kasir",
+  "version": "2.0.0",
+  "description": "Aplikasi pembukuan UPK BUMDESMA, dilengkapi fitur neraca dan laporan rugi laba.",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "start": "node apps/api/dist/main"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/jquery": "^3.5.32",
+    "@types/multer": "^2.0.0",
+    "prisma": "^6.12.0",
+    "sass-embedded": "^1.89.2",
+    "turbo": "^2.5.4"
+  },
+  "workspaces": [
+    "apps/*"
+  ],
+  "dependencies": {
+    "@nestjs/jwt": "^11.0.0",
+    "@nestjs/mapped-types": "*",
+    "@nestjs/platform-socket.io": "^11.1.5",
+    "@nestjs/websockets": "^11.1.5",
+    "@prisma/client": "^6.12.0",
+    "@reduxjs/toolkit": "^2.8.2",
+    "bcrypt": "^6.0.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.2",
+    "jquery": "^3.7.1",
+    "react-redux": "^9.2.0",
+    "socket.io-client": "^4.8.1",
+    "uuid": "^11.1.0"
+  }
+}
