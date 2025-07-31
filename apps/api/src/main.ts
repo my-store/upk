@@ -17,7 +17,7 @@ async function bootstrap() {
   // Redirect the root URL to /api
   app.setGlobalPrefix('api');
 
-  await app.listen(process.env.APP_SERVER_PORT ?? 3000);
+  await app.listen(process.env.APP_SERVER_PORT ?? 5000);
 }
 
 bootstrap();

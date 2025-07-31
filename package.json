@@ -22,6 +22,7 @@
     "apps/*"
   ],
   "dependencies": {
+    "@nestjs/config": "^4.0.2",
     "@nestjs/jwt": "^11.0.0",
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-socket.io": "^11.1.5",

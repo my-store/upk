@@ -13,7 +13,7 @@ import './App.scss';
 import SocketDisconnected from './templates/SocketDisconnected';
 
 // Server configuration (this must be matched with api/.env file)
-const ServerUrl: string = 'http://192.168.1.102:3000';
+const ServerUrl: string = 'http://192.168.1.102:5000';
 
 const AvailabelPage = [
   {

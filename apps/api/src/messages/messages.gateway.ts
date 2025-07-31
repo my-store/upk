@@ -1,12 +1,12 @@
 import {
+  OnGatewayConnection,
+  OnGatewayDisconnect,
   WebSocketGateway,
   SubscribeMessage,
-  MessageBody,
   WebSocketServer,
   ConnectedSocket,
   OnGatewayInit,
-  OnGatewayConnection,
-  OnGatewayDisconnect,
+  MessageBody,
 } from '@nestjs/websockets';
 import { MessagesService } from './messages.service';
 import { CreateMessageDto } from './dto/create-message.dto';
