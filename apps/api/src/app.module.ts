@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { Module } from '@nestjs/common';
 import { join } from 'path';
+import { KasirModule } from './kasir/kasir.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { join } from 'path';
     AdminModule,
     UserModule,
     AuthModule,
+    KasirModule,
   ],
 })
 export class AppModule {}

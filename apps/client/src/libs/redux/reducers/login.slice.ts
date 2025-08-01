@@ -9,37 +9,46 @@ export interface LoginDataInterface {
   foto: string;
 }
 
-interface DefaultLoginStateInterface {
+interface DefaultLoginInterface {
   isLogin: boolean;
+  loginWait: boolean;
   loginData: LoginDataInterface | boolean;
 }
 
-export const DefaultLoginState: DefaultLoginStateInterface = {
+const DefaultLoginState: DefaultLoginInterface = {
   isLogin: false,
+  loginWait: false,
   loginData: false,
 };
 
-function LoginHandler(
-  state: DefaultLoginStateInterface,
-  action: ActionInterface,
-) {
+function LoginHandler(state: DefaultLoginInterface, action: ActionInterface) {
   state.isLogin = true;
   state.loginData = action.payload;
 }
 
-function LogoutHandler(state: DefaultLoginStateInterface) {
+function LogoutHandler(state: DefaultLoginInterface) {
   state.isLogin = false;
   state.loginData = false;
+}
+
+function WaitLoginHandler(state: DefaultLoginInterface) {
+  state.loginWait = true;
+}
+
+function FinishWaitLoginHandler(state: DefaultLoginInterface) {
+  state.loginWait = false;
 }
 
 const LoginSlice = createSlice({
   name: 'login',
   initialState: DefaultLoginState,
   reducers: {
+    waitLogin: WaitLoginHandler,
+    finishWaitLogin: FinishWaitLoginHandler,
     login: LoginHandler,
     logout: LogoutHandler,
   },
 });
 
-export const { login, logout } = LoginSlice.actions;
+export const { waitLogin, finishWaitLogin, login, logout } = LoginSlice.actions;
 export default LoginSlice.reducer;

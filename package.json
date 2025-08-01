@@ -33,7 +33,9 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
     "jquery": "^3.7.1",
+    "react-loading-indicators": "^1.0.1",
     "react-redux": "^9.2.0",
+    "react-router": "^7.7.1",
     "socket.io-client": "^4.8.1",
     "uuid": "^11.1.0"
   }

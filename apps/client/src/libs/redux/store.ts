@@ -1,7 +1,8 @@
-import { configureStore } from '@reduxjs/toolkit';
-import PersediaanReducer from './reducers/persediaan.slice';
+import AlertReducer from './reducers/components/alert';
 import SocketReducer from './reducers/socket.slice';
+import { configureStore } from '@reduxjs/toolkit';
 import LoginReducer from './reducers/login.slice';
+import RootReducer from './reducers/root.slice';
 
 export interface ActionInterface {
   payload: any;
@@ -10,9 +11,10 @@ export interface ActionInterface {
 
 export const store = configureStore({
   reducer: {
-    persediaan: PersediaanReducer,
+    root: RootReducer,
     socket: SocketReducer,
     login: LoginReducer,
+    alert: AlertReducer,
   },
 });
 

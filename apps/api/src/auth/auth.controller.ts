@@ -14,12 +14,18 @@ import {
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private service: AuthService) {}
 
-  @HttpCode(HttpStatus.OK)
   @Post()
   signIn(@Body() signInDto: AuthLoginDto) {
-    return this.authService.signIn(signInDto.tlp, signInDto.pass);
+    return this.service.signIn(signInDto.tlp, signInDto.pass);
+  }
+
+  @Post('refresh')
+  refreshToken(@Body('data') data: string) {
+    const person = JSON.parse(Buffer.from(data, 'hex').toString('utf8'));
+    const { tlp, password } = person;
+    return this.service.refresh(tlp, password);
   }
 
   @UseGuards(AuthGuard)

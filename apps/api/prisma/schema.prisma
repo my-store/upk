@@ -26,6 +26,7 @@ model Admin {
 
   // RelatiChild tables
   User                 User[]
+  Kasir                Kasir[]
   BankOperasionalBkk   BankOperasionalBkk[]
   KasOperasional       KasOperasional[]
   BankBriMd            BankBriMd[]
@@ -38,6 +39,31 @@ model Admin {
 }
 
 model User {
+  id        Int      @id @default(autoincrement())
+  nama      String
+  tlp       String   @unique
+  password  String
+  foto      String   @default("") // URL foto
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Parent table
+  Admin   Admin? @relation(fields: [adminId], references: [id])
+  adminId Int?
+
+  // Child tables
+  BankOperasionalBkk   BankOperasionalBkk[]
+  KasOperasional       KasOperasional[]
+  BankBriMd            BankBriMd[]
+  ModalDesa            ModalDesa[]
+  KasModalDesa         KasModalDesa[]
+  RekonsiliasiRekening RekonsiliasiRekening[]
+  KasSpp               KasSpp[]
+  BankSppBrebes        BankSppBrebes[]
+  BankSppJateng        BankSppJateng[]
+}
+
+model Kasir {
   id        Int      @id @default(autoincrement())
   nama      String
   tlp       String   @unique
@@ -88,6 +114,8 @@ model BankOperasionalBkk {
   // Dibawah ini, beberapa kolom yang perlu dipertanyakan fungsinya
   saldoRekDo        Int?
   ketSaldoAwalTahun Int?
+
+  Kasir Kasir[]
 }
 
 model KasOperasional {
@@ -124,6 +152,8 @@ model KasOperasional {
 
   // Dibawah ini, beberapa kolom yang perlu dipertanyakan fungsinya
   saldoKasOperasional Int?
+
+  Kasir Kasir[]
 }
 
 model BankBriMd {
@@ -152,6 +182,8 @@ model BankBriMd {
   // Dibawah ini, beberapa kolom yang perlu dipertanyakan fungsinya
   saldoRekBumdesmaUpk Int?
   ketSaldoAwalTahun   Int?
+
+  Kasir Kasir[]
 }
 
 model ModalDesa {
@@ -173,6 +205,8 @@ model ModalDesa {
 
   // Dibawah ini, beberapa kolom yang perlu dipertanyakan fungsinya
   saldo Int?
+
+  Kasir Kasir[]
 }
 
 model KasModalDesa {
@@ -200,6 +234,8 @@ model KasModalDesa {
 
   // Dibawah ini, beberapa kolom yang perlu dipertanyakan fungsinya
   saldoKas Int?
+
+  Kasir Kasir[]
 }
 
 model RekonsiliasiRekening {
@@ -226,6 +262,8 @@ model RekonsiliasiRekening {
   sisaDanaSeharusnya Int?
   cashOnHand         Int?
   selisihDana        Int?
+
+  Kasir Kasir[]
 }
 
 model KasSpp {
@@ -254,6 +292,8 @@ model KasSpp {
 
   // Dibawah ini, beberapa kolom yang perlu dipertanyakan fungsinya
   saldoKasSpp Int?
+
+  Kasir Kasir[]
 }
 
 model BankSppBrebes {
@@ -281,6 +321,8 @@ model BankSppBrebes {
   // Dibawah ini, beberapa kolom yang perlu dipertanyakan fungsinya
   saldoRekSpp       Int?
   ketSaldoAwalTahun Int?
+
+  Kasir Kasir[]
 }
 
 model BankSppJateng {
@@ -308,4 +350,6 @@ model BankSppJateng {
   // Dibawah ini, beberapa kolom yang perlu dipertanyakan fungsinya
   saldoRekSpp       Int?
   ketSaldoAwalTahun Int?
+
+  Kasir Kasir[]
 }

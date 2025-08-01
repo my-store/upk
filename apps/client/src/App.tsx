@@ -1,111 +1,189 @@
-import { disconnect } from './libs/redux/reducers/socket.slice';
+import { rootRemoveLoading } from './libs/redux/reducers/root.slice';
+import { BrowserRouter, Route, Routes } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
-import { useEffect, useState, type JSX } from 'react';
+import { FirstLoading } from './components/loading';
 import type { RootState } from './libs/redux/store';
-import Persediaan from './pages/persediaan';
-import Sidebar from './templates/Sidebar';
-import Footer from './templates/Footer';
-import Header from './templates/Header';
-import { socket } from './libs/socket';
-import Laporan from './pages/laporan';
+import Alert from './components/alert';
 import Login from './pages/login';
+import { useEffect } from 'react';
 import './App.scss';
-import SocketDisconnected from './templates/SocketDisconnected';
+import { login } from './libs/redux/reducers/login.slice';
 
 // Server configuration (this must be matched with api/.env file)
-const ServerUrl: string = 'http://192.168.1.102:5000';
+const ServerUrl: string = 'http://localhost:5000';
 
-const AvailabelPage = [
-  {
-    id: 'persediaan',
-    component: <Persediaan />,
-  },
-  {
-    id: 'laporan',
-    component: <Laporan />,
-  },
-];
-
-interface SignedInPageProps {
-  setPage: Function;
-  page: JSX.Element;
+function Admin() {
+  return <h1>Admin Page</h1>;
 }
 
-function SignedInPage(props: SignedInPageProps) {
-  // Socket state
-  const connected = useSelector((state: RootState) => state.socket.connected);
+function User() {
+  return <h1>User Page</h1>;
+}
 
-  return (
-    <div className="App">
-      <Header />
-      <Sidebar setPage={props.setPage} />
-      <main>
-        <div className="banner"></div>
-        {props.page}
-
-        {/* Disconnect message | Will override everithing */}
-        {!connected && <SocketDisconnected />}
-      </main>
-      <Footer />
-    </div>
-  );
+function NotFound() {
+  return <h1>404 | Not Found</h1>;
 }
 
 function App() {
-  // Login state
+  const state = useSelector((state: RootState) => state.root);
   const loginState = useSelector((state: RootState) => state.login);
-
-  // State dispatcher
   const dispatch = useDispatch();
 
-  const [page, updatePage]: any = useState(null);
+  async function checkToken(Token: string): Promise<Response> {
+    const checkToken = await fetch('/api/auth', {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    return checkToken;
+  }
 
-  // This function only for signed-in users
-  function setPage(id: string) {
-    const newPage = AvailabelPage.find((ap) => ap.id == id);
-    if (newPage) {
-      updatePage(
-        <SignedInPage
-          setPage={setPage}
-          page={{
-            ...newPage.component,
-            props: {
-              ...newPage.component.props,
-              ServerUrl,
-            },
-          }}
-        />,
+  async function signedIn(props: { Token: string; Data: string }) {
+    const { Token, Data }: any = props;
+
+    // Cek token
+    const tokenChecked = await checkToken(Token);
+    // Token is expired
+    if (tokenChecked.status == 401) {
+      // Refresh token
+      const tryRefresh = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ data: Data.data }),
+      });
+      const refreshedToken = await tryRefresh.json();
+
+      // Cek kembali token hasil refresh
+      let recheckedToken: any = await checkToken(refreshedToken.access_token);
+
+      // Failed to refresh token, maybe user deleteed or something
+      if (recheckedToken.status == 401) {
+        // Remove credentials from local storage
+        localStorage.removeItem('UPK.Login.Credentials');
+
+        // Terminate task and reload the page
+        return window.location.reload();
+      }
+
+      // Refreshsed token is valid, berisi { sub, data }
+      recheckedToken = await recheckedToken.json();
+
+      // Re-save (new) credentials
+      localStorage.setItem(
+        'UPK.Login.Credentials',
+        JSON.stringify({
+          Token: refreshedToken.access_token,
+          Data: recheckedToken,
+        }),
       );
+
+      // Set login
+      dispatch(login(recheckedToken.data));
     }
+
+    // Remove loading animation
+    dispatch(rootRemoveLoading());
   }
 
   useEffect(() => {
-    // Login check ...
+    // Find login data on local-storage
+    const loginCredentials = localStorage.getItem('UPK.Login.Credentials');
 
-    // Load default page
-    // if (loginState.isLogin && loginState.loginData) {
-    //   setPage('laporan');
-    // }
+    // Login data not exist
+    if (!loginCredentials) {
+      // Remove loading animation
+      dispatch(rootRemoveLoading());
+    }
 
-    // Load login page
-    // else {
-    //   updatePage(<Login ServerUrl={ServerUrl} />);
-    // }
-
-    // Default page in development | Pending ...
-    setPage('laporan');
-
-    // Pending ...
-    // Socket connection listener
-
-    // Socket terputus
-    socket.on('disconnect', () => {
-      // Ubah state socket ke status "disconected"
-      dispatch(disconnect());
-    });
+    // Login data is founded
+    else {
+      signedIn(JSON.parse(loginCredentials));
+    }
   }, []);
 
-  return page;
+  if (state.isLoading) {
+    return <FirstLoading ServerUrl={ServerUrl} easing="ease-in-out" />;
+  }
+
+  return (
+    <BrowserRouter>
+      <div className="App">
+        <Alert />
+        <Routes>
+          <Route path="*" element={<NotFound />} />
+
+          {!loginState.isLogin && (
+            <Route path="/" element={<Login ServerUrl={ServerUrl} />} />
+          )}
+
+          {loginState.isLogin && <Route path="/" element={<Admin />} />}
+          {/* {loginState.isLogin && <Route path="/user" element={<User />} />} */}
+        </Routes>
+      </div>
+    </BrowserRouter>
+  );
 }
 
 export default App;
+
+// const [page, setPage] = useState(null as any);
+
+// async function checkToken(Token: string): Promise<Response> {
+//   const checkToken = await fetch('/api/auth', {
+//     headers: {
+//       Authorization: `Bearer ${Token}`,
+//       'Content-Type': 'application/json',
+//     },
+//   });
+//   return checkToken;
+// }
+
+// async function signedIn(props: { Token: string; Data: string }) {
+//   const { Token, Data }: any = props;
+
+//   return console.log({ Token, Data });
+
+//   // Cek token
+//   const tokenChecked = await checkToken(Token);
+//   // Token is expired
+//   if (tokenChecked.status == 401) {
+//     // Refresh token
+//     const tryRefresh = await fetch('/api/auth/refresh', {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//       body: JSON.stringify({ data: Data.data }),
+//     });
+//     const refreshedToken = await tryRefresh.json();
+
+//     // Cek kembali token hasil refresh
+//     let recheckedToken = await checkToken(refreshedToken.access_token);
+
+//     // Failed to refresh token, maybe user deleteed or something
+//     if (recheckedToken.status == 401) {
+//       // Remove credentials from local storage
+//       localStorage.removeItem('UPK.Login.Credentials');
+
+//       // Terminate task and reload the page
+//       return window.location.reload();
+//     }
+
+//     // Refreshsed token is valid, berisi { sub, data }
+//     recheckedToken = await recheckedToken.json();
+
+//     // Re-save (new) credentials
+//     localStorage.setItem(
+//       'UPK.Login.Credentials',
+//       JSON.stringify({
+//         Token: refreshedToken.access_token,
+//         Data: recheckedToken,
+//       }),
+//     );
+//   }
+
+//   setPage(userPage);
+// }

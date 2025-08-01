@@ -4,15 +4,15 @@ interface DefaultSocketStateInterface {
   connected: boolean;
 }
 
-export const DefaultSocketState: DefaultSocketStateInterface = {
-  connected: false,
+const DefaultSocketState: DefaultSocketStateInterface = {
+  connected: true,
 };
 
-function ConnectHandle(state: DefaultSocketStateInterface) {
+function ReconnectHandler(state: DefaultSocketStateInterface) {
   state.connected = true;
 }
 
-function DisconnectHandle(state: DefaultSocketStateInterface) {
+function DisconnectedHandler(state: DefaultSocketStateInterface) {
   state.connected = false;
 }
 
@@ -20,10 +20,10 @@ const SocketSlice = createSlice({
   name: 'persediaan',
   initialState: DefaultSocketState,
   reducers: {
-    connect: ConnectHandle,
-    disconnect: DisconnectHandle,
+    reconnect: ReconnectHandler,
+    disconnected: DisconnectedHandler,
   },
 });
 
-export const { connect, disconnect } = SocketSlice.actions;
+export const { reconnect, disconnected } = SocketSlice.actions;
 export default SocketSlice.reducer;
