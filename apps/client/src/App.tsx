@@ -1,4 +1,5 @@
 import { openAlert } from './libs/redux/reducers/components/alert';
+import { login } from './libs/redux/reducers/login.slice';
 import { JSONGet, JSONPost } from './libs/redux/requests';
 import { useDispatch, useSelector } from 'react-redux';
 import { FirstLoading } from './components/loading';
@@ -21,15 +22,23 @@ function App() {
 
   function openLoginPage() {
     // Set login page as active page
-    setPage(<Login ServerUrl={ServerUrl} Callback={checkCredentials} />);
+    setPage(
+      <Login
+        GetAuthProfile={getAuthProfile}
+        Callback={checkCredentials}
+        ServerUrl={ServerUrl}
+      />,
+    );
   }
 
-  async function checkProfile(access_token: string): Promise<any> {
+  async function getProfile(tlp: string, role: string) {
+    const profile = await JSONGet(`/api/${role.toLowerCase()}/${tlp}`);
+    dispatch(login(profile));
+  }
+
+  async function getAuthProfile(access_token: string): Promise<any> {
     let profile: any;
     try {
-      // Show progress message
-      console.log('Checking token ...');
-
       // Melakukan pengecekan ke server apakah token masih aktif
       profile = await JSONGet('/api/auth', {
         headers: { Authorization: `Bearer ${access_token}` },
@@ -46,16 +55,10 @@ function App() {
       // sub = No Tlp. User/Admin/Kasir
       // role = User/Admin/Kasir
       if (!profile.iat || !profile.exp || !profile.sub || !profile.role) {
-        // Show error message
-        console.error('Token is expired');
-
         // Terminate task
         return false;
       }
     } catch {
-      // Show error message
-      console.error('Failed to get login profile');
-
       // Terminate task
       return false;
     }
@@ -65,9 +68,6 @@ function App() {
   // Call this function if token is expired
   async function refreshToken(tlp: string) {
     try {
-      // Show progress message
-      console.log('Refreshing token ...');
-
       // Melakukan permintaan ke server untuk dibuatkan token baru
       const refreshedToken = await JSONPost('/api/auth/refresh', {
         body: JSON.stringify({ tlp }),
@@ -81,20 +81,16 @@ function App() {
 
       // Permintaan token baru ditolak atau terjadi error pada server
       if (!refreshedToken.access_token || !refreshedToken.role) {
-        // Show error message
-        console.error('Failed to refresh token', refreshedToken);
-
         // Terminate process and force to open login page
         return openLoginPage();
       }
 
-      // Update login profile
-      const profile = await JSONGet('/api/auth', {
-        headers: {},
-      });
+      // Get new (refreshed) login profile
+      const profile = await getAuthProfile(refreshedToken.access_token);
+      // Update login profile on local storage
       localStorage.setItem('UPK.Login.Profile', JSON.stringify(profile));
 
-      // Refresh token succeed, re-create credentials on local storage
+      // Update credentials on local storage
       localStorage.setItem(
         'UPK.Login.Credentials',
         JSON.stringify({ ...refreshedToken, tlp }),
@@ -104,10 +100,10 @@ function App() {
       console.log('Token is refreshed');
 
       /*
-          | Token sudah expired, namun berhasil mendapatkan token baru
-          | Step selanjutnya adalah membuka halaman default sesuai role:
-          | Admin | User | Kasir
-          */
+      | Token sudah expired, namun berhasil mendapatkan token baru
+      | Step selanjutnya adalah membuka halaman default sesuai role:
+      | Admin | User | Kasir
+      */
     } catch {
       // Failed to refresh token, show the error message
       dispatch(
@@ -122,21 +118,36 @@ function App() {
     }
   }
 
+  function credNotValid() {
+    // Show error message
+    console.error('Login credentials in not valid');
+    // Force open login page
+    openLoginPage();
+  }
+
   async function checkToken(data: string) {
     // Important token | login data
-    const { access_token, role } = JSON.parse(data);
+    let access_token, role, tlp;
+    try {
+      const token = JSON.parse(data);
 
-    // If important data is not valid
-    if (!access_token || !role) {
-      // Show error message
-      console.error('Login credentials in not valid');
+      // If important data is not valid
+      if (!token.access_token || !token.role || !tlp) {
+        // Show error message and force to open login page
+        return credNotValid();
+      }
 
-      // Force open login page
-      return openLoginPage();
+      // Saved credentials is valid
+      access_token = token.access_token;
+      role = token.role;
+      tlp = token.tlp;
+    } catch {
+      // Show error message and force to open login page
+      return credNotValid();
     }
 
     // Check login-profile
-    const profile = await checkProfile(access_token);
+    const profile = await getAuthProfile(access_token);
     if (!profile) {
       // Token expired, force to open login page
       return openLoginPage();
@@ -147,7 +158,7 @@ function App() {
 
     // Buka halaman sesuai tipe/role login
     if (role == 'Admin') {
-      setPage(<Admin />);
+      setPage(<Admin refreshToken={refreshToken} />);
     } else if (role == 'User') {
       setPage(<User ServerUrl={ServerUrl} />);
     } else if (role == 'Kasir') {

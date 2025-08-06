@@ -13,6 +13,7 @@ import '../../styles/login/index.scss';
 import $ from 'jquery';
 
 interface LoginProps {
+  GetAuthProfile: any;
   ServerUrl: string;
   Callback?: any;
 }
@@ -106,29 +107,17 @@ export default function Login(props: LoginProps) {
       }
 
       // Meminta profile token ke server
-      const profile: any = await JSONGet('/api/auth', {
-        headers: { Authorization: `Bearer ${tryLogin.access_token}` },
-      });
-      // Jika token expired, response dari server adalah:
-      // message dan statusCode.
-      // message = Unauthorized
-      // statusCode = 401
-      // ----------------------------------------------------
-      // Namun jika token masih aktif, response server adalah:
-      // iat, exp, sub, role
-      // iat = Issued At (where the token is created)
-      // exp = Expired
-      // sub = No Tlp. User/Admin/Kasir
-      // role = User/Admin/Kasir
-      if (!profile.iat || !profile.exp || !profile.sub || !profile.role) {
+      const profile: any = await props.GetAuthProfile(tryLogin.access_token);
+      // Variable profile berisi boolean atau object (response) dari api/auth
+      if (!profile) {
         // Terminate task and display the error message
         return failed('Gagal meminta profile token ke server');
       }
 
-      // Create login profile
+      // Create login profile on local storage
       localStorage.setItem('UPK.Login.Profile', JSON.stringify(profile));
 
-      // Login succeed, create login credentials on local storage
+      // Create login credentials on local storage
       localStorage.setItem(
         'UPK.Login.Credentials',
         JSON.stringify({ ...tryLogin, tlp }),
