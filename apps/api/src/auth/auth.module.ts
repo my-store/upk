@@ -1,3 +1,4 @@
+import { KasirModule } from 'src/kasir/kasir.module';
 import { AdminModule } from '../admin/admin.module';
 import { AuthController } from './auth.controller';
 import { UserModule } from '../user/user.module';
@@ -10,10 +11,11 @@ import { JwtModule } from '@nestjs/jwt';
   imports: [
     AdminModule,
     UserModule,
+    KasirModule,
     JwtModule.register({
       global: true,
       secret: jwtConstants.secret,
-      signOptions: { expiresIn: '60s' },
+      signOptions: { expiresIn: '10s' },
     }),
   ],
   controllers: [AuthController],

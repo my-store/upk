@@ -1,16 +1,20 @@
+import { rootRemoveLoading } from '../../libs/redux/reducers/root.slice';
 import { openAlert } from '../../libs/redux/reducers/components/alert';
+import { JSONGet, JSONPost } from '../../libs/redux/requests';
 import type { RootState } from '../../libs/redux/store';
 import { useDispatch, useSelector } from 'react-redux';
-import { type CSSProperties } from 'react';
-import '../../styles/login/index.scss';
-import $ from 'jquery';
+import { useEffect, type CSSProperties } from 'react';
 import {
   finishWaitLogin,
+  updateBg,
   waitLogin,
 } from '../../libs/redux/reducers/login.slice';
+import '../../styles/login/index.scss';
+import $ from 'jquery';
 
 interface LoginProps {
   ServerUrl: string;
+  Callback?: any;
 }
 
 export default function Login(props: LoginProps) {
@@ -19,6 +23,27 @@ export default function Login(props: LoginProps) {
 
   const dispatch = useDispatch();
   const errorSound = new Audio(`${props.ServerUrl}/static/sounds/error.mp3`);
+
+  // Background image, remove loading only when background is loaded
+  const bgUrl: string = `${props.ServerUrl}/static/img/company-team.jpeg`;
+
+  useEffect(() => {
+    // Always clean localstorage before action
+    localStorage.removeItem('UPK.Login.Credentials');
+    localStorage.removeItem('UPK.Login.Profile');
+
+    // Wait background image is fully loaded,
+    // then remove loading.
+    const bg = new Image();
+    bg.onload = () => {
+      // Update background URL state
+      dispatch(updateBg(bgUrl));
+
+      // Remove loading animation after 3 second
+      setTimeout(() => dispatch(rootRemoveLoading()), 3000);
+    };
+    bg.src = bgUrl;
+  }, []);
 
   function failed(msg: string): void {
     // Play error sound
@@ -53,66 +78,74 @@ export default function Login(props: LoginProps) {
       return failed('Mohon isi seluruh data');
     }
 
-    let token: any = null;
-    let profile: any = null;
-
-    // If wrong credentials, the server will return null or undefined not json type
+    // Persiapan login
     try {
-      // Persiapan login
-      const tryLogin = await fetch('/api/auth', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      const tryLogin = await JSONPost('/api/auth', {
         body: JSON.stringify({ tlp, pass }),
       });
+      // ---------------------------------------------------------------------------
+      // JIKA DATA LOGIN BENAR
+      // ---------------------------------------------------------------------------
+      // Maka response yang diberikan server yaitu:
+      // access_token dan role
+      // access_token yang akan digunakan pada headers.Authorization
+      // role = Admin, Kasir atau User, ini server yang menentukan saat proses login
+      // server akan mencari tahu siapa yang sedang login.
 
       // Tlp atau password salah
-      if (tryLogin.status == 401) {
+      if (tryLogin?.statusCode == 401) {
         // Terminate task
         return failed('Kombinasi data tidak benar');
       }
 
-      const { access_token } = await tryLogin.json();
-
-      // JWT access token
-      if (!access_token) {
-        // Terminate task
+      // Server tidak memberikan response yang diharapkan seperti dijelaskan diatas
+      // kemungkinan ada error pada server atau konfigurasi.
+      if (!tryLogin.access_token || !tryLogin.role) {
+        // Terminate task and display the error message
         return failed('Tidak ada akses token dari server');
       }
 
-      // Get jwt profile
-      const tryProfile = await fetch('/api/auth', {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-        },
+      // Meminta profile token ke server
+      const profile: any = await JSONGet('/api/auth', {
+        headers: { Authorization: `Bearer ${tryLogin.access_token}` },
       });
-      // Berisi { sub, data }
-      const tryProfileResult = await tryProfile.json();
+      // Jika token expired, response dari server adalah:
+      // message dan statusCode.
+      // message = Unauthorized
+      // statusCode = 401
+      // ----------------------------------------------------
+      // Namun jika token masih aktif, response server adalah:
+      // iat, exp, sub, role
+      // iat = Issued At (where the token is created)
+      // exp = Expired
+      // sub = No Tlp. User/Admin/Kasir
+      // role = User/Admin/Kasir
+      if (!profile.iat || !profile.exp || !profile.sub || !profile.role) {
+        // Terminate task and display the error message
+        return failed('Gagal meminta profile token ke server');
+      }
 
-      token = access_token;
-      profile = tryProfileResult;
+      // Create login profile
+      localStorage.setItem('UPK.Login.Profile', JSON.stringify(profile));
+
+      // Login succeed, create login credentials on local storage
+      localStorage.setItem(
+        'UPK.Login.Credentials',
+        JSON.stringify({ ...tryLogin, tlp }),
+      );
+
+      // Trigger callback (if exist)
+      if (props.Callback) {
+        props.Callback();
+      }
     } catch (error) {
       // Terminate task
       return failed(JSON.stringify(error));
     }
-
-    // Login succeed, create credentials on local machine
-    createCredentials(token, profile);
-
-    // Reload page
-    window.location.reload();
-  }
-
-  function createCredentials(Token: string, Data: any) {
-    localStorage.setItem(
-      'UPK.Login.Credentials',
-      JSON.stringify({ Token, Data }),
-    );
   }
 
   const DynamicStyles: CSSProperties = {
-    backgroundImage: `url(${props.ServerUrl}/static/img/company-team.jpeg)`,
+    backgroundImage: `url(${loginState.loginBg})`,
   };
 
   return (

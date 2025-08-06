@@ -42,6 +42,8 @@ export default function User(props: UserProps) {
     // });
   }, []);
 
+  return null;
+
   return (
     <BrowserRouter>
       <div

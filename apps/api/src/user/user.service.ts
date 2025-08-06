@@ -17,8 +17,8 @@ export class UserService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(data: Prisma.UserCreateInput): Promise<User> {
-    let newData: any = { ...data };
+  async create(data: any): Promise<User> {
+    let newData: Prisma.UserCreateInput = { ...data };
 
     // Konfigurasi timestamp
     const thisTime = new Date().toISOString();
@@ -32,8 +32,8 @@ export class UserService {
     return this.prisma.user.create({ data: newData });
   }
 
-  update(where: Prisma.UserWhereUniqueInput, data: Prisma.UserUpdateInput) {
-    let updatedData = { ...data };
+  async update(where: Prisma.UserWhereUniqueInput, data: any): Promise<User> {
+    let updatedData: Prisma.UserUpdateInput = { ...data };
 
     // Konfigurasi timestamp
     const thisTime = new Date().toISOString();

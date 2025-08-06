@@ -25,8 +25,8 @@ export class AdminService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(data: Prisma.AdminCreateInput): Promise<Admin> {
-    let newData: any = { ...data };
+  async create(data: any): Promise<Admin> {
+    let newData: Prisma.AdminCreateInput = { ...data };
 
     // Konfigurasi timestamp
     const thisTime = new Date().toISOString();
@@ -40,8 +40,8 @@ export class AdminService {
     return this.prisma.admin.create({ data: newData });
   }
 
-  update(where: Prisma.AdminWhereUniqueInput, data: Prisma.AdminUpdateInput) {
-    let updatedData = { ...data };
+  async update(where: Prisma.AdminWhereUniqueInput, data: any): Promise<Admin> {
+    let updatedData: Prisma.AdminUpdateInput = { ...data };
 
     // Konfigurasi timestamp
     const thisTime = new Date().toISOString();

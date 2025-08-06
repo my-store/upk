@@ -1,9 +1,11 @@
-import { Module } from '@nestjs/common';
-import { KasirService } from './kasir.service';
 import { KasirController } from './kasir.controller';
+import { PrismaService } from 'src/prisma.service';
+import { KasirService } from './kasir.service';
+import { Module } from '@nestjs/common';
 
 @Module({
+  exports: [KasirService],
   controllers: [KasirController],
-  providers: [KasirService],
+  providers: [KasirService, PrismaService],
 })
 export class KasirModule {}

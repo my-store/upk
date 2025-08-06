@@ -7,3 +7,8 @@ export class AuthLoginDto {
   @IsNotEmpty()
   pass: string;
 }
+
+export class AuthRefreshDto {
+  @IsNotEmpty()
+  tlp: string;
+}

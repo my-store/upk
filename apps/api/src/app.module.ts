@@ -1,13 +1,14 @@
 import { PersediaanModule } from './persediaan/persediaan.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
-import { MessagesModule } from './messages/messages.module';
 import { AdminModule } from './admin/admin.module';
+import { KasirModule } from './kasir/kasir.module';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
+import { AppGateway } from './app.gateway';
+import { AppService } from './app.service';
 import { Module } from '@nestjs/common';
 import { join } from 'path';
-import { KasirModule } from './kasir/kasir.module';
 
 @Module({
   imports: [
@@ -16,11 +17,12 @@ import { KasirModule } from './kasir/kasir.module';
     }),
     ConfigModule.forRoot({ isGlobal: true }),
     PersediaanModule,
-    MessagesModule,
     AdminModule,
     UserModule,
     AuthModule,
     KasirModule,
   ],
+
+  providers: [AppGateway, AppService],
 })
 export class AppModule {}

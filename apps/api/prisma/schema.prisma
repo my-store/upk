@@ -21,8 +21,11 @@ model Admin {
   tlp       String   @unique
   password  String
   foto      String   @default("") // URL foto
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime
+  updatedAt DateTime
+
+  online     Boolean @default(false)
+  lastOnline String  @default("")
 
   // RelatiChild tables
   User                 User[]
@@ -44,8 +47,14 @@ model User {
   tlp       String   @unique
   password  String
   foto      String   @default("") // URL foto
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime
+  updatedAt DateTime
+
+  online     Boolean @default(false)
+  lastOnline String  @default("")
+
+  active        Boolean @default(true)
+  deactivatedAt String  @default("")
 
   // Parent table
   Admin   Admin? @relation(fields: [adminId], references: [id])
@@ -69,8 +78,14 @@ model Kasir {
   tlp       String   @unique
   password  String
   foto      String   @default("") // URL foto
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime
+  updatedAt DateTime
+
+  online     Boolean @default(false)
+  lastOnline String  @default("")
+
+  active        Boolean @default(true)
+  deactivatedAt String  @default("")
 
   // Parent table
   Admin   Admin? @relation(fields: [adminId], references: [id])
@@ -93,14 +108,16 @@ model BankOperasionalBkk {
   keterangan     String
   tipe           String // Tarik atau Setor
   buktiTransaksi String? // Berisi URL foto (SOON)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime
+  updatedAt      DateTime
 
   // Parent table (who create or change this data)
   Admin   Admin? @relation(fields: [adminId], references: [id])
   adminId Int?
   User    User?  @relation(fields: [userId], references: [id])
   userId  Int?
+  Kasir   Kasir? @relation(fields: [kasirId], references: [id])
+  kasirId Int?
 
   // Pemasukan
   pmkSetorRekDo Int
@@ -114,8 +131,6 @@ model BankOperasionalBkk {
   // Dibawah ini, beberapa kolom yang perlu dipertanyakan fungsinya
   saldoRekDo        Int?
   ketSaldoAwalTahun Int?
-
-  Kasir Kasir[]
 }
 
 model KasOperasional {
@@ -123,14 +138,16 @@ model KasOperasional {
   keterangan     String
   tipe           String // Tarik atau Setor
   buktiTransaksi String? // Berisi URL foto (SOON)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime
+  updatedAt      DateTime
 
   // Parent table (who create or change this data)
   Admin   Admin? @relation(fields: [adminId], references: [id])
   adminId Int?
   User    User?  @relation(fields: [userId], references: [id])
   userId  Int?
+  Kasir   Kasir? @relation(fields: [kasirId], references: [id])
+  kasirId Int?
 
   // Pemasukan
   pmkRekSppUep  Int
@@ -152,8 +169,6 @@ model KasOperasional {
 
   // Dibawah ini, beberapa kolom yang perlu dipertanyakan fungsinya
   saldoKasOperasional Int?
-
-  Kasir Kasir[]
 }
 
 model BankBriMd {
@@ -161,14 +176,16 @@ model BankBriMd {
   keterangan     String
   tipe           String // Tarik atau Setor
   buktiTransaksi String? // Berisi URL foto (SOON)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime
+  updatedAt      DateTime
 
   // Parent table (who create or change this data)
   Admin   Admin? @relation(fields: [adminId], references: [id])
   adminId Int?
   User    User?  @relation(fields: [userId], references: [id])
   userId  Int?
+  Kasir   Kasir? @relation(fields: [kasirId], references: [id])
+  kasirId Int?
 
   // Pemasukan
   pmkSetorRekBumdesmaUpk Int
@@ -182,22 +199,22 @@ model BankBriMd {
   // Dibawah ini, beberapa kolom yang perlu dipertanyakan fungsinya
   saldoRekBumdesmaUpk Int?
   ketSaldoAwalTahun   Int?
-
-  Kasir Kasir[]
 }
 
 model ModalDesa {
   id             Int      @id @default(autoincrement())
   keterangan     String
   buktiTransaksi String? // Berisi URL foto (SOON)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime
+  updatedAt      DateTime
 
   // Parent table (who create or change this data)
   Admin   Admin? @relation(fields: [adminId], references: [id])
   adminId Int?
   User    User?  @relation(fields: [userId], references: [id])
   userId  Int?
+  Kasir   Kasir? @relation(fields: [kasirId], references: [id])
+  kasirId Int?
 
   // Penyertaan modal desa
   tipe      String // Tarik atau Setor
@@ -205,22 +222,22 @@ model ModalDesa {
 
   // Dibawah ini, beberapa kolom yang perlu dipertanyakan fungsinya
   saldo Int?
-
-  Kasir Kasir[]
 }
 
 model KasModalDesa {
   id             Int      @id @default(autoincrement())
   keterangan     String
   buktiTransaksi String? // Berisi URL foto (SOON)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime
+  updatedAt      DateTime
 
   // Parent table (who create or change this data)
   Admin   Admin? @relation(fields: [adminId], references: [id])
   adminId Int?
   User    User?  @relation(fields: [userId], references: [id])
   userId  Int?
+  Kasir   Kasir? @relation(fields: [kasirId], references: [id])
+  kasirId Int?
 
   // Pemasukan
   pmkKas                    Int
@@ -234,8 +251,6 @@ model KasModalDesa {
 
   // Dibawah ini, beberapa kolom yang perlu dipertanyakan fungsinya
   saldoKas Int?
-
-  Kasir Kasir[]
 }
 
 model RekonsiliasiRekening {
@@ -243,14 +258,16 @@ model RekonsiliasiRekening {
   dana       String // Jenis dana (DO UPK, SPP, UEP dll)
   noRek      Int
   keterangan String // Jenis/ nama bank
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt  DateTime
+  updatedAt  DateTime
 
   // Parent table (who create or change this data)
   Admin   Admin? @relation(fields: [adminId], references: [id])
   adminId Int?
   User    User?  @relation(fields: [userId], references: [id])
   userId  Int?
+  Kasir   Kasir? @relation(fields: [kasirId], references: [id])
+  kasirId Int?
 
   // Dibawah ini, beberapa kolom yang perlu dipertanyakan fungsinya
   tanggalSaldo       Int?
@@ -262,22 +279,22 @@ model RekonsiliasiRekening {
   sisaDanaSeharusnya Int?
   cashOnHand         Int?
   selisihDana        Int?
-
-  Kasir Kasir[]
 }
 
 model KasSpp {
   id             Int      @id @default(autoincrement())
   keterangan     String
   buktiTransaksi String? // Berisi URL foto (SOON)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime
+  updatedAt      DateTime
 
   // Parent table (who create or change this data)
   Admin   Admin? @relation(fields: [adminId], references: [id])
   adminId Int?
   User    User?  @relation(fields: [userId], references: [id])
   userId  Int?
+  Kasir   Kasir? @relation(fields: [kasirId], references: [id])
+  kasirId Int?
 
   // Pemasukan
   pmkPokok       Int
@@ -292,22 +309,22 @@ model KasSpp {
 
   // Dibawah ini, beberapa kolom yang perlu dipertanyakan fungsinya
   saldoKasSpp Int?
-
-  Kasir Kasir[]
 }
 
 model BankSppBrebes {
   id             Int      @id @default(autoincrement())
   keterangan     String
   buktiTransaksi String? // Berisi URL foto (SOON)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime
+  updatedAt      DateTime
 
   // Parent table (who create or change this data)
   Admin   Admin? @relation(fields: [adminId], references: [id])
   adminId Int?
   User    User?  @relation(fields: [userId], references: [id])
   userId  Int?
+  Kasir   Kasir? @relation(fields: [kasirId], references: [id])
+  kasirId Int?
 
   // Pemasukan
   pmkSetorRekSpp Int
@@ -321,22 +338,22 @@ model BankSppBrebes {
   // Dibawah ini, beberapa kolom yang perlu dipertanyakan fungsinya
   saldoRekSpp       Int?
   ketSaldoAwalTahun Int?
-
-  Kasir Kasir[]
 }
 
 model BankSppJateng {
   id             Int      @id @default(autoincrement())
   keterangan     String
   buktiTransaksi String? // Berisi URL foto (SOON)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime
+  updatedAt      DateTime
 
   // Parent table (who create or change this data)
   Admin   Admin? @relation(fields: [adminId], references: [id])
   adminId Int?
   User    User?  @relation(fields: [userId], references: [id])
   userId  Int?
+  Kasir   Kasir? @relation(fields: [kasirId], references: [id])
+  kasirId Int?
 
   // Pemasukan
   pmkSetorRekSpp Int
@@ -350,6 +367,4 @@ model BankSppJateng {
   // Dibawah ini, beberapa kolom yang perlu dipertanyakan fungsinya
   saldoRekSpp       Int?
   ketSaldoAwalTahun Int?
-
-  Kasir Kasir[]
 }

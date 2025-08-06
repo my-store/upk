@@ -1,49 +1,60 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { Admin, User } from '../../generated/prisma/client';
+import { Admin, User, Kasir } from '../../generated/prisma/client';
+import { KasirService } from 'src/kasir/kasir.service';
 import { AdminService } from '../admin/admin.service';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
 interface FindAdminOrUser {
-  data: Admin | User;
-  type: string;
+  data: Admin | User | Kasir;
+  role: string;
 }
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly user: UserService,
     private readonly admin: AdminService,
+    private readonly kasir: KasirService,
+    private readonly user: UserService,
     private readonly jwt: JwtService,
   ) {}
 
   async findAdminOrUser(tlp: string): Promise<FindAdminOrUser> {
     let data: any;
-    let type: string = '';
+    let role: string = '';
 
     // Try find admin first
     try {
       data = await this.admin.findOne({ where: { tlp } });
-      type = 'Admin';
+      role = 'Admin';
     } catch (error) {}
 
-    // Admin not found, try find user
+    // Admin not found, try find User
     if (!data) {
       try {
         data = await this.user.findOne({ where: { tlp } });
-        type = 'User';
+        role = 'User';
       } catch (error) {}
     }
 
-    return { data, type };
+    // User not found, try find Kasir
+    if (!data) {
+      try {
+        data = await this.kasir.findOne({ where: { tlp } });
+        role = 'Kasir';
+      } catch (error) {}
+    }
+
+    return { data, role };
   }
 
   async signIn(tlp: string, pass: string): Promise<any> {
-    const { data, type }: any = await this.findAdminOrUser(tlp);
+    const { data, role }: any = await this.findAdminOrUser(tlp);
 
-    // Admin or User not found
+    // Admin or User or Kasir not found
     if (!data) {
+      // Terminate task
       throw new UnauthorizedException();
     }
 
@@ -56,33 +67,35 @@ export class AuthService {
     }
 
     // Create JWT token
-    return this.createJwt(data, type);
+    return this.createJwt(data, role);
   }
 
-  async createJwt(person: Admin | User, type: string): Promise<any> {
-    // Convert person data into hex string
-    const personString = JSON.stringify(person);
-    const personHex = Buffer.from(personString, 'utf8').toString('hex');
-
-    // Generate JWT token
-    const payload = { sub: person.tlp, type, data: personHex };
-    return { access_token: await this.jwt.signAsync(payload) };
+  async createJwt(person: Admin | User | Kasir, role: string): Promise<any> {
+    const payload = { sub: person.tlp, role };
+    const access_token = await this.jwt.signAsync(payload);
+    return { access_token, role };
   }
 
-  async refresh(tlp: string, pass: string) {
-    const { data, type }: any = await this.findAdminOrUser(tlp);
+  async refresh(tlp: string): Promise<void> {
+    // Ambil data user/admin
+    const { data, role }: any = await this.findAdminOrUser(tlp);
 
-    // Admin or User not found
+    // Admin or User or Kasir not found
     if (!data) {
+      // Terminate task
       throw new UnauthorizedException();
     }
 
-    // Wrong password
-    if (pass != data.password) {
-      throw new UnauthorizedException();
-    }
+    // --------------------------------------------------------------
+    // SOON
+    // --------------------------------------------------------------
+    // Disini akan dilakukan pengecekan pada database token,
+    // jika data tidak benar, blokir permintaan refresh token.
+    // --------------------------------------------------------------
+    // Jangan lupa buat dulu tabel untuk menyimpan token di database.
+    // --------------------------------------------------------------
 
-    // Create JWT token
-    return this.createJwt(data, type);
+    // Buat token baru
+    return this.createJwt(data, role);
   }
 }

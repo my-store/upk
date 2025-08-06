@@ -27,7 +27,7 @@ import {
   Get,
 } from '@nestjs/common';
 
-// @UseGuards(AuthGuard)
+@UseGuards(AuthGuard)
 @Controller('admin')
 export class AdminController {
   constructor(private readonly service: AdminService) {}
@@ -41,11 +41,18 @@ export class AdminController {
   ): Promise<any> {
     let newData: any;
 
-    // Check foto ...
+    // Jika admin tidak mengunggah foto
     if (!foto) {
       throw new BadRequestException('Wajib mengunggah foto!');
-    } else {
-      //
+    }
+
+    // Admin mengunggah foto namun formatnya salah,
+    // atau mungkin admin salah input file.
+    else {
+      const { status, message } = ProfileImageValidator(foto);
+      if (!status) {
+        throw new BadRequestException(message);
+      }
     }
 
     // Set image name
