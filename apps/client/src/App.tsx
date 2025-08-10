@@ -101,17 +101,11 @@ function App() {
   }
 
   function checkCredentials() {
-    // Dispay progress message
-    Log('Checking login credentials');
-
     // Find login data on local-storage
     const loginCredentials = getLoginCredentials();
 
     // User NOT signed-in
     if (!loginCredentials) {
-      // Dispay error message
-      Error('No login credentials detected');
-
       // Force open login page
       return openLoginPage();
     }

@@ -46,27 +46,9 @@ export async function getUserData(tlp: string, loginToken: any): Promise<any> {
   const getProfileURL: string = `/api/${loginToken.role.toLowerCase()}/${tlp}`;
 
   try {
-    const getUser = await JSONGet(getProfileURL, {
+    userData = await JSONGet(getProfileURL, {
       headers: { Authorization: `Bearer ${loginToken.access_token}` },
     });
-    const { nama, tlp, foto, createdAt, updatedAt } = getUser;
-    // User data response is not valid (maybe token expired or something)
-    if (!nama || !tlp || !foto || !createdAt || !updatedAt) {
-      // Dispay warning message
-      Warn('Failed to get user data');
-    }
-
-    // User data is fetched
-    else {
-      // Ambil hanya nama, tlp, foto, createdAt dan updatedAt saja
-      userData = {
-        nama: userData.nama,
-        tlp: userData.tlp,
-        foto: userData.foto,
-        createdAt: userData.createdAt,
-        updatedAt: userData.updatedAt,
-      };
-    }
   } catch (error) {
     // Dispay error message
     Error('Failed to get user data');
@@ -82,10 +64,9 @@ export async function getAuthProfile(access_token: string): Promise<any> {
   let profile: any = null;
   try {
     // Melakukan pengecekan ke server apakah token masih aktif
-    const getProfile = await JSONGet('/api/auth', {
+    profile = await JSONGet('/api/auth', {
       headers: { Authorization: `Bearer ${access_token}` },
     });
-    const { iat, exp, sub, role } = getProfile;
     // Jika token expired, response dari server adalah:
     // message dan statusCode.
     // message = Unauthorized
@@ -97,16 +78,6 @@ export async function getAuthProfile(access_token: string): Promise<any> {
     // exp = Expired
     // sub = No Tlp. User/Admin/Kasir
     // role = User/Admin/Kasir
-    if (!iat || !exp || !sub || !role) {
-      // Dispay warning message
-      Warn('Failed to get auth profile');
-      Warn('Expected response: \n\t1. iat\n\t2. exp\n\t3. sub\n\t4. role');
-    }
-
-    // Auth profile is presented
-    else {
-      profile = getProfile;
-    }
   } catch {
     // Dispay error message
     Error('Failed to get auth profile');
@@ -122,7 +93,7 @@ export async function refreshToken(tlp: string): Promise<boolean> {
   let tokenRefreshed: any = false;
   try {
     // Melakukan permintaan ke server untuk dibuatkan token baru
-    const refreshedToken = await JSONPost('/api/auth/refresh', {
+    const getNewToken = await JSONPost('/api/auth/refresh', {
       body: JSON.stringify({ tlp }),
     });
     // Jika refresh token berhasil dibuat, maka response darai server
@@ -132,37 +103,18 @@ export async function refreshToken(tlp: string): Promise<boolean> {
     // role = Admin, Kasir atau User, ini server yang menentukan saat proses login
     // server akan mencari tahu siapa yang sedang login.
 
-    // Permintaan token baru ditolak atau terjadi error pada server
-    if (!refreshedToken.access_token || !refreshedToken.role) {
-      // Dispay warning message
-      Warn('Token refresh failed');
-      Warn('Expected response: \n\t1. access_token\n\t2. role');
-    }
+    // Get user data
+    const userData = await getUserData(tlp, getNewToken);
 
-    // Token is refreshsed
-    else {
-      // Get user data
-      const userData = await getUserData(tlp, refreshedToken);
+    // Update credentials on local storage
+    await setLoginCredentials({ ...getNewToken, data: userData });
 
-      // No user data is found
-      if (!userData) {
-        // Dispay error message
-        Error('Token refresh failed');
-      }
-
-      //   Token refresh success
-      else {
-        // Update credentials on local storage
-        await setLoginCredentials({ ...refreshedToken, data: userData });
-
-        /*
+    /*
         | Token sudah expired, namun berhasil mendapatkan token baru
         | Step selanjutnya adalah membuka halaman default sesuai role:
         | Admin | User | Kasir
         */
-        tokenRefreshed = true;
-      }
-    }
+    tokenRefreshed = true;
   } catch {
     // Dispay error message
     Error('Token refresh failed');
