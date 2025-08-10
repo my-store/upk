@@ -1,5 +1,5 @@
+import './styles/user.templates.header.styles.main.scss';
 import type { CSSProperties } from 'react';
-import '../../../styles/user/templates/header.scss';
 
 interface FooterProps {
   globalStyle: any;

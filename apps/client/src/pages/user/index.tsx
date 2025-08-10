@@ -1,18 +1,22 @@
-// import { disconnect } from '../../libs/redux/reducers/socket.slice';
+import { getLoginCredentials, getUserData } from '../../libs/credentials';
+import { rootRemoveLoading } from '../../libs/redux/reducers/root.slice';
+import { setLoginData } from '../../libs/redux/reducers/login.slice';
 import { BrowserRouter, Route, Routes } from 'react-router';
 import type { RootState } from '../../libs/redux/store';
 import { useDispatch, useSelector } from 'react-redux';
+import type { Socket } from 'socket.io-client';
 import Sidebar from './templates/sidebar';
 import Footer from './templates/footer';
 import Header from './templates/header';
 import Inventaris from './inventaris';
-import '../../styles/user/index.scss';
-// import { io } from 'socket.io-client';
 import { useEffect } from 'react';
+import './user.styles.main.scss';
 import Laporan from './laporan';
 
 interface UserProps {
-  ServerUrl: string;
+  openLoginPage: any;
+  serverUrl: string;
+  socket: Socket;
 }
 
 const GlobalStyle = {
@@ -23,26 +27,68 @@ const GlobalStyle = {
 };
 
 export default function User(props: UserProps) {
-  const { ServerUrl } = props;
+  const { serverUrl, openLoginPage, socket } = props;
 
-  const { connected } = useSelector((state: RootState) => state.socket);
+  const loginState = useSelector((state: RootState) => state.login);
   const dispatch = useDispatch();
 
+  function onlineHandler(tlp: string) {}
+
+  function offlineHandler(tlp: string) {}
+
+  function socketListener() {
+    /*--------------------------------------------------------------------
+    | AN ADMIN DELETES USER
+    | --------------------------------------------------------------------
+    | If currently signed-in is user, and matched the 'tlp',
+    | force this user to open login page and remove all login credentials.
+    */
+    socket.on('delete-user', (tlp) => {
+      // Get my login data
+      const { data } = getLoginCredentials();
+
+      // My login data is deleted or admin is deletes my account
+      if (!data || data.tlp == tlp) {
+        // Force me to open login page (also remove login credentials)
+        return openLoginPage();
+      }
+
+      // Admin deleted someone else
+      // ... Do something, example: change online indicator etc.
+    });
+
+    socket.on('online', onlineHandler);
+    socket.on('offline', offlineHandler);
+  }
+
+  // When the page is loaded or refreshed
+  async function load() {
+    socketListener();
+
+    // Important token | login data
+    const { access_token, role, data } = getLoginCredentials();
+
+    // Get full user data
+    const user = await getUserData(data.tlp, { access_token, role });
+
+    // No user data is founded
+    if (!user) {
+      // Terminate task and force to open login page
+      return openLoginPage();
+    }
+
+    // Set user (login) data
+    dispatch(setLoginData(user));
+
+    // Remove loading animation after 3 second
+    setTimeout(() => dispatch(rootRemoveLoading()), 3000);
+  }
+
   useEffect(() => {
-    console.log(localStorage.getItem('UPK.Login.Credentials'));
-    // const socket = io(ServerUrl);
-
-    // socket.on('connect', () => {
-    //   console.log('Connected!');
-    // });
-
-    // socket.on('disconnect', () => {
-    //   console.log('Disconnected!');
-    //   dispatch(disconnect());
-    // });
+    load();
   }, []);
 
-  return null;
+  if (!loginState.loginData) return null;
 
   return (
     <BrowserRouter>
@@ -54,7 +100,11 @@ export default function User(props: UserProps) {
         }}
       >
         <Header globalStyle={GlobalStyle} />
-        <Sidebar globalStyle={GlobalStyle} />
+        <Sidebar
+          globalStyle={GlobalStyle}
+          serverUrl={serverUrl}
+          userData={loginState.loginData}
+        />
         <Routes>
           <Route path="/" element={<Homepage />} />
           <Route path="/inventaris" element={<Inventaris />} />

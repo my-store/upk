@@ -1,27 +1,27 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-interface DefaulStateInterface {
+interface DefaulState {
   isLoading: boolean;
 }
 
-const DefaultState: DefaulStateInterface = {
+const DefaultRootState: DefaulState = {
   isLoading: true,
 };
 
-function OpenLoadingHandler(state: DefaulStateInterface) {
+function OpenLoading(state: DefaulState) {
   state.isLoading = true;
 }
 
-function RemoveLoadingHandler(state: DefaulStateInterface) {
+function RemoveLoading(state: DefaulState) {
   state.isLoading = false;
 }
 
 const RootSlice = createSlice({
   name: 'root',
-  initialState: DefaultState,
+  initialState: DefaultRootState,
   reducers: {
-    rootOpenLoading: OpenLoadingHandler,
-    rootRemoveLoading: RemoveLoadingHandler,
+    rootOpenLoading: OpenLoading,
+    rootRemoveLoading: RemoveLoading,
   },
 });
 

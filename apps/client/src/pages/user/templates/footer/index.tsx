@@ -1,4 +1,4 @@
-import '../../../styles/user/templates/footer.scss';
+import './styles/user.templates.footer.styles.main.scss';
 
 interface FooterProps {
   globalStyle: any;

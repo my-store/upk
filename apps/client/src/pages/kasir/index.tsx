@@ -1,4 +1,4 @@
-import '../../styles/kasir/index.scss';
+import './styles/kasir.styles.main.scss';
 
 export default function Kasir() {
   return (

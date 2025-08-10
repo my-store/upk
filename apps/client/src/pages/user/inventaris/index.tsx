@@ -1,4 +1,4 @@
-import '../../../styles/user/inventaris/index.scss';
+import './styles/user.inventaris.styles.main.scss';
 
 export default function Inventaris() {
   return (

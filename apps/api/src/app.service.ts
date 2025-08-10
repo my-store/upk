@@ -58,13 +58,9 @@ export class AppService {
   }
 
   async logout(tlp: string, role: string): Promise<Admin | User | Kasir> {
-    // Last online (ISO date string)
-    const lastOnline = new Date().toISOString();
-
-    // Data to be updated
-    const updatedData = { online: false, lastOnline };
-
-    // Execute update and return updated data as a response
-    return this.update(tlp, role, updatedData);
+    return this.update(tlp, role, {
+      online: false,
+      lastOnline: new Date().toISOString(),
+    });
   }
 }

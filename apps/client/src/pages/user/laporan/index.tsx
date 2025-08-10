@@ -1,4 +1,4 @@
-import '../../../styles/user/laporan/index.scss';
+import './styles/user.laporan.styles.main.scss';
 
 export default function Laporan() {
   return (

@@ -1,19 +1,24 @@
-import { openAlert } from './libs/redux/reducers/components/alert';
-import { login } from './libs/redux/reducers/login.slice';
-import { JSONGet, JSONPost } from './libs/redux/requests';
+import { disconnected } from './libs/redux/reducers/socket.slice';
 import { useDispatch, useSelector } from 'react-redux';
 import { FirstLoading } from './components/loading';
 import type { RootState } from './libs/redux/store';
 import { useEffect, useState } from 'react';
+import { Error, Log } from './libs/console';
 import Alert from './components/alert';
+import { io } from 'socket.io-client';
 import Login from './pages/login';
 import Admin from './pages/admin';
 import Kasir from './pages/kasir';
 import User from './pages/user';
+import {
+  getLoginCredentials,
+  getAuthProfile,
+  refreshToken,
+} from './libs/credentials';
 import './App.scss';
 
 // Server configuration (this must be matched with api/.env file)
-const ServerUrl: string = 'http://localhost:5000';
+const serverUrl: string = 'http://localhost:5000';
 
 function App() {
   const [page, setPage] = useState(null as any);
@@ -21,157 +26,92 @@ function App() {
   const dispatch = useDispatch();
 
   function openLoginPage() {
-    // Set login page as active page
-    setPage(
-      <Login
-        GetAuthProfile={getAuthProfile}
-        Callback={checkCredentials}
-        ServerUrl={ServerUrl}
-      />,
-    );
+    setPage(<Login Callback={checkCredentials} serverUrl={serverUrl} />);
   }
 
-  async function getProfile(tlp: string, role: string) {
-    const profile = await JSONGet(`/api/${role.toLowerCase()}/${tlp}`);
-    dispatch(login(profile));
-  }
-
-  async function getAuthProfile(access_token: string): Promise<any> {
-    let profile: any;
-    try {
-      // Melakukan pengecekan ke server apakah token masih aktif
-      profile = await JSONGet('/api/auth', {
-        headers: { Authorization: `Bearer ${access_token}` },
-      });
-      // Jika token expired, response dari server adalah:
-      // message dan statusCode.
-      // message = Unauthorized
-      // statusCode = 401
-      // ----------------------------------------------------
-      // Namun jika token masih aktif, response server adalah:
-      // iat, exp, sub, role
-      // iat = Issued At (where the token is created)
-      // exp = Expired
-      // sub = No Tlp. User/Admin/Kasir
-      // role = User/Admin/Kasir
-      if (!profile.iat || !profile.exp || !profile.sub || !profile.role) {
-        // Terminate task
-        return false;
-      }
-    } catch {
-      // Terminate task
-      return false;
-    }
-    return profile;
-  }
-
-  // Call this function if token is expired
-  async function refreshToken(tlp: string) {
-    try {
-      // Melakukan permintaan ke server untuk dibuatkan token baru
-      const refreshedToken = await JSONPost('/api/auth/refresh', {
-        body: JSON.stringify({ tlp }),
-      });
-      // Jika refresh token berhasil dibuat, maka response darai server
-      // adalah sama dengan ketika login yaitu berisi:
-      // access_token dan role
-      // access_token yang akan digunakan pada headers.Authorization
-      // role = Admin, Kasir atau User, ini server yang menentukan saat proses login
-      // server akan mencari tahu siapa yang sedang login.
-
-      // Permintaan token baru ditolak atau terjadi error pada server
-      if (!refreshedToken.access_token || !refreshedToken.role) {
-        // Terminate process and force to open login page
-        return openLoginPage();
-      }
-
-      // Get new (refreshed) login profile
-      const profile = await getAuthProfile(refreshedToken.access_token);
-      // Update login profile on local storage
-      localStorage.setItem('UPK.Login.Profile', JSON.stringify(profile));
-
-      // Update credentials on local storage
-      localStorage.setItem(
-        'UPK.Login.Credentials',
-        JSON.stringify({ ...refreshedToken, tlp }),
-      );
-
-      // Show progress message
-      console.log('Token is refreshed');
-
-      /*
-      | Token sudah expired, namun berhasil mendapatkan token baru
-      | Step selanjutnya adalah membuka halaman default sesuai role:
-      | Admin | User | Kasir
-      */
-    } catch {
-      // Failed to refresh token, show the error message
-      dispatch(
-        openAlert({
-          type: 'Error',
-          title: 'Gagal Memperbarui Token',
-          body: 'Sepertinya ada masalah saat komputer mencoba meminta token baru kepada server.',
-        }),
-      );
-      // Terminate process and force to open login page
-      return openLoginPage();
-    }
-  }
-
-  function credNotValid() {
-    // Show error message
-    console.error('Login credentials in not valid');
-    // Force open login page
-    openLoginPage();
-  }
-
-  async function checkToken(data: string) {
+  async function checkToken(cred: any) {
     // Important token | login data
-    let access_token, role, tlp;
-    try {
-      const token = JSON.parse(data);
+    const { access_token, role, data } = cred;
 
-      // If important data is not valid
-      if (!token.access_token || !token.role || !tlp) {
-        // Show error message and force to open login page
-        return credNotValid();
-      }
-
-      // Saved credentials is valid
-      access_token = token.access_token;
-      role = token.role;
-      tlp = token.tlp;
-    } catch {
-      // Show error message and force to open login page
-      return credNotValid();
+    // If important data is not valid
+    if (!access_token || !role || !data) {
+      // Force open login page
+      return openLoginPage();
     }
 
     // Check login-profile
     const profile = await getAuthProfile(access_token);
     if (!profile) {
-      // Token expired, force to open login page
-      return openLoginPage();
+      // Dispay error message
+      Error('Token expired');
+
+      // Token expired, refresh token
+      const tokenRefreshed = await refreshToken(data.tlp);
+      // Token refresh failed
+      if (!tokenRefreshed) {
+        // Terminate process and force to open login page
+        return openLoginPage();
+      }
+
+      // Re-check credentials
+      return checkCredentials();
     }
 
-    // Show progress message
-    console.log('Token check is passed');
+    // SOCKET INSTANCE
+    const socket = io(serverUrl);
+
+    /*
+    | --------------------------------------------------------------------
+    | WHEN I'AM IS CONNECTED TO SOCKET SERVER
+    | --------------------------------------------------------------------
+    | Get my login data in local-storage and sent to server for broadcast
+    */
+    socket.on('connect', () => {
+      // Get my login data
+      const { data, role } = getLoginCredentials();
+      // Broadcast to other, that i'm is online now
+      socket.emit('online', { tlp: data.tlp, role });
+    });
+
+    // When socket is disconected
+    socket.on('disconnect', () => {
+      dispatch(disconnected());
+    });
 
     // Buka halaman sesuai tipe/role login
     if (role == 'Admin') {
-      setPage(<Admin refreshToken={refreshToken} />);
+      setPage(
+        <Admin
+          openLoginPage={openLoginPage}
+          serverUrl={serverUrl}
+          socket={socket}
+        />,
+      );
     } else if (role == 'User') {
-      setPage(<User ServerUrl={ServerUrl} />);
+      setPage(
+        <User
+          openLoginPage={openLoginPage}
+          serverUrl={serverUrl}
+          socket={socket}
+        />,
+      );
     } else if (role == 'Kasir') {
       setPage(<Kasir />);
     }
   }
 
   function checkCredentials() {
+    // Dispay progress message
+    Log('Checking login credentials');
+
     // Find login data on local-storage
-    const loginCredentials = localStorage.getItem('UPK.Login.Credentials');
+    const loginCredentials = getLoginCredentials();
 
     // User NOT signed-in
     if (!loginCredentials) {
+      // Dispay error message
+      Error('No login credentials detected');
+
       // Force open login page
       return openLoginPage();
     }
@@ -187,7 +127,7 @@ function App() {
   return (
     <div className="App">
       {state.isLoading && (
-        <FirstLoading ServerUrl={ServerUrl} easing="ease-in-out" />
+        <FirstLoading serverUrl={serverUrl} easing="ease-in-out" />
       )}
       <Alert />
       {page}

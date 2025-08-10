@@ -1,5 +1,5 @@
-import '../../../styles/user/templates/socket-disconnected.scss';
-import type { RootState } from '../../../libs/redux/store';
+import './styles/user.templates.socket-disconnected.styles.main.scss';
+import type { RootState } from '../../../../libs/redux/store';
 import { useSelector } from 'react-redux';
 
 export default function SocketDisconnected() {

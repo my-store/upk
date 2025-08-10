@@ -6,6 +6,7 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class AdminService {
   private readonly findAllKeys: Prisma.AdminSelect = {
+    id: true,
     nama: true,
     tlp: true,
     foto: true,

@@ -1,5 +1,5 @@
 import { LifeLine } from 'react-loading-indicators';
-import '../styles/components/loading.scss';
+import './loading.styles.scss';
 
 type Easing =
   | 'ease-in'
@@ -20,11 +20,11 @@ interface LoadingInterface {
   textColor?: string;
   size?: any;
   easing?: Easing;
-  ServerUrl: string;
+  serverUrl: string;
 }
 
 export function FirstLoading(props: LoadingInterface) {
-  let { color, size, text, textColor, easing, ServerUrl } = props;
+  let { color, size, text, textColor, easing, serverUrl } = props;
 
   if (!color) color = '#ffffff';
   if (!size) size = 'medium';
@@ -33,7 +33,7 @@ export function FirstLoading(props: LoadingInterface) {
   if (!easing) easing = 'ease-in-out';
 
   // This maybe dynamic (SOON)
-  const Background = `${ServerUrl}/static/img/island-night-moon.jpg`;
+  const Background = `${serverUrl}/static/img/island-night-moon.jpg`;
 
   return (
     <div

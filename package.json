@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
+    "build-start": "npm run build && npm start",
     "start": "node apps/api/dist/main"
   },
   "keywords": [],

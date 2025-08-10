@@ -1,20 +1,20 @@
 import { rootRemoveLoading } from '../../libs/redux/reducers/root.slice';
 import { openAlert } from '../../libs/redux/reducers/components/alert';
-import { JSONGet, JSONPost } from '../../libs/redux/requests';
+import { getUserData, removeLoginCredentials } from '../../libs/credentials';
 import type { RootState } from '../../libs/redux/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, type CSSProperties } from 'react';
+import { JSONPost } from '../../libs/requests';
 import {
   finishWaitLogin,
   updateBg,
   waitLogin,
 } from '../../libs/redux/reducers/login.slice';
-import '../../styles/login/index.scss';
+import './styles/login.styles.main.scss';
 import $ from 'jquery';
 
 interface LoginProps {
-  GetAuthProfile: any;
-  ServerUrl: string;
+  serverUrl: string;
   Callback?: any;
 }
 
@@ -23,15 +23,14 @@ export default function Login(props: LoginProps) {
   const { loginWait } = loginState;
 
   const dispatch = useDispatch();
-  const errorSound = new Audio(`${props.ServerUrl}/static/sounds/error.mp3`);
+  const errorSound = new Audio(`${props.serverUrl}/static/sounds/error.mp3`);
 
   // Background image, remove loading only when background is loaded
-  const bgUrl: string = `${props.ServerUrl}/static/img/company-team.jpeg`;
+  const bgUrl: string = `${props.serverUrl}/static/img/company-team.jpeg`;
 
   useEffect(() => {
     // Always clean localstorage before action
-    localStorage.removeItem('UPK.Login.Credentials');
-    localStorage.removeItem('UPK.Login.Profile');
+    removeLoginCredentials();
 
     // Wait background image is fully loaded,
     // then remove loading.
@@ -106,22 +105,25 @@ export default function Login(props: LoginProps) {
         return failed('Tidak ada akses token dari server');
       }
 
-      // Meminta profile token ke server
-      const profile: any = await props.GetAuthProfile(tryLogin.access_token);
-      // Variable profile berisi boolean atau object (response) dari api/auth
-      if (!profile) {
+      /*
+      | -------------------------------------------------------
+      | LOGIN CREDENTIALS
+      | -------------------------------------------------------
+      | access_token, role and data
+      */
+
+      // Get login profile
+      const userData = await getUserData(tlp, tryLogin);
+
+      // No user data is founded
+      if (!userData) {
         // Terminate task and display the error message
-        return failed('Gagal meminta profile token ke server');
+        return failed('Data user tidak ditemukan');
       }
 
-      // Create login profile on local storage
-      localStorage.setItem('UPK.Login.Profile', JSON.stringify(profile));
-
       // Create login credentials on local storage
-      localStorage.setItem(
-        'UPK.Login.Credentials',
-        JSON.stringify({ ...tryLogin, tlp }),
-      );
+      const loginData = { ...tryLogin, data: userData };
+      localStorage.setItem('UPK.Login.Credentials', JSON.stringify(loginData));
 
       // Trigger callback (if exist)
       if (props.Callback) {
@@ -129,7 +131,7 @@ export default function Login(props: LoginProps) {
       }
     } catch (error) {
       // Terminate task
-      return failed(JSON.stringify(error));
+      return failed(`${error}`);
     }
   }
 

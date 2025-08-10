@@ -1,65 +1,63 @@
-import { createSlice } from '@reduxjs/toolkit';
 import type { ActionInterface } from '../store';
+import { createSlice } from '@reduxjs/toolkit';
 
-// Mengikuti data dari server
-export interface LoginDataInterface {
-  id: string | number;
+interface LoginDataInterface {
   nama: string;
   tlp: string;
   foto: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-interface DefaultLoginInterface {
-  isLogin: boolean;
+interface DefaultStateInterface {
   loginWait: boolean;
   loginBg: string;
   loginData: LoginDataInterface | boolean;
 }
 
-const DefaultLoginState: DefaultLoginInterface = {
-  isLogin: false,
+const DefaultState: DefaultStateInterface = {
+  loginData: false,
   loginWait: false,
   loginBg: '',
-  loginData: false,
 };
 
-function LoginHandler(state: DefaultLoginInterface, action: ActionInterface) {
-  state.isLogin = true;
+function SetLoginData(state: DefaultStateInterface, action: ActionInterface) {
   state.loginData = action.payload;
 }
 
-function LogoutHandler(state: DefaultLoginInterface) {
-  state.isLogin = false;
-  state.loginData = false;
+function ResetLoginData(state: DefaultStateInterface) {
+  state.loginData = DefaultState.loginData;
 }
 
-function WaitLoginHandler(state: DefaultLoginInterface) {
+function WaitLogin(state: DefaultStateInterface) {
   state.loginWait = true;
 }
 
-function FinishWaitLoginHandler(state: DefaultLoginInterface) {
+function FinishWaitLogin(state: DefaultStateInterface) {
   state.loginWait = false;
 }
 
-function UpdateBgHandler(
-  state: DefaultLoginInterface,
-  action: ActionInterface,
-) {
+function UpdateBg(state: DefaultStateInterface, action: ActionInterface) {
   state.loginBg = action.payload;
 }
 
 const LoginSlice = createSlice({
   name: 'login',
-  initialState: DefaultLoginState,
+  initialState: DefaultState,
   reducers: {
-    waitLogin: WaitLoginHandler,
-    finishWaitLogin: FinishWaitLoginHandler,
-    updateBg: UpdateBgHandler,
-    login: LoginHandler,
-    logout: LogoutHandler,
+    waitLogin: WaitLogin,
+    finishWaitLogin: FinishWaitLogin,
+    updateBg: UpdateBg,
+    setLoginData: SetLoginData,
+    resetLoginData: ResetLoginData,
   },
 });
 
-export const { waitLogin, finishWaitLogin, updateBg, login, logout } =
-  LoginSlice.actions;
+export const {
+  waitLogin,
+  finishWaitLogin,
+  updateBg,
+  setLoginData,
+  resetLoginData,
+} = LoginSlice.actions;
 export default LoginSlice.reducer;

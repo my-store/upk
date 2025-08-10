@@ -1,0 +1,30 @@
+.User {
+  .Online-List {
+    position: fixed;
+    right: 0px;
+    bottom: 0px;
+    z-index: 3;
+    background-color: maroon;
+    height: 40vh;
+    width: 15vw;
+
+    .Online-List-Header {
+      .Online-List-Header-Text {
+        font-size: 14px;
+        font-weight: bold;
+      }
+    }
+    .Online-List-Body {
+      .Online-List-Item {
+        .Online-List-Item-Image {
+        }
+
+        .Online-List-Item-Info {
+          .Online-List-Item-Name {
+            font-size: 13px;
+          }
+        }
+      }
+    }
+  }
+}

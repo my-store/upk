@@ -1,12 +1,14 @@
-import '../../../styles/user/templates/sidebar.scss';
+import './styles/user.templates.sidebar.styles.main.scss';
 import { Link } from 'react-router';
 
 interface SidebarProps {
   globalStyle: any;
+  userData: any;
+  serverUrl: string;
 }
 
 export default function Sidebar(props: SidebarProps) {
-  const { globalStyle } = props;
+  const { globalStyle, userData, serverUrl } = props;
 
   // Colors
   const { primaryColor } = globalStyle;
@@ -38,12 +40,13 @@ export default function Sidebar(props: SidebarProps) {
             style={{
               width: `${sidebarWidth - 15}px`,
               height: `${sidebarWidth - 15}px`,
+              backgroundImage: `url(${serverUrl + '/static' + userData.foto})`,
             }}
           ></div>
         </div>
         <div className="profile-info">
-          <p className="profile-name">Izzat Alharis</p>
-          <p className="profile-email">izzatalharist@gmail.com</p>
+          <p className="profile-name">{userData.nama}</p>
+          <p className="profile-email">{userData.tlp}</p>
         </div>
       </div>
       <div className="sidebar-buttons-container">
