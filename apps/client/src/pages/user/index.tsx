@@ -1,10 +1,7 @@
-import { getLoginCredentials, getUserData } from '../../libs/credentials';
+import { UserOnlineList, UserOnlineListTrigger } from './templates/online-list';
 import { rootRemoveLoading } from '../../libs/redux/reducers/root.slice';
-import { setLoginData } from '../../libs/redux/reducers/login.slice';
-import { BrowserRouter, Route, Routes } from 'react-router';
 import type { RootState } from '../../libs/redux/store';
 import { useDispatch, useSelector } from 'react-redux';
-import type { Socket } from 'socket.io-client';
 import Sidebar from './templates/sidebar';
 import Footer from './templates/footer';
 import Header from './templates/header';
@@ -12,110 +9,95 @@ import Inventaris from './inventaris';
 import { useEffect } from 'react';
 import './user.styles.main.scss';
 import Laporan from './laporan';
+import $ from 'jquery';
 
-interface UserProps {
-  openLoginPage: any;
-  serverUrl: string;
-  socket: Socket;
+export interface UserGlobalStyleInterface {
+  navbarHeight: number;
+  sidebarWidth: number;
+  primaryColor: string;
+  secondaryColor: string;
 }
 
-const GlobalStyle = {
+const globalStyle: UserGlobalStyleInterface = {
   navbarHeight: 35,
   sidebarWidth: 220,
   primaryColor: 'rgb(50, 101, 167)',
   secondaryColor: 'rgb(33, 76, 131)',
 };
 
-export default function User(props: UserProps) {
-  const { serverUrl, openLoginPage, socket } = props;
+function UserHome() {
+  useEffect(() => {
+    // Force scrolll to top
+    $('html, body').animate({ scrollTop: 0 }, 'fast');
+  }, []);
 
-  const loginState = useSelector((state: RootState) => state.login);
+  return <h1>Homepage for User</h1>;
+}
+
+function UserGlobalTemplates({ children, socketConnect }: any) {
+  const rootState = useSelector((state: RootState) => state.root);
+  const onlineState = useSelector((state: RootState) => state.user_onlineList);
   const dispatch = useDispatch();
 
-  function onlineHandler(tlp: string) {}
-
-  function offlineHandler(tlp: string) {}
-
-  function socketListener() {
-    /*--------------------------------------------------------------------
-    | AN ADMIN DELETES USER
-    | --------------------------------------------------------------------
-    | If currently signed-in is user, and matched the 'tlp',
-    | force this user to open login page and remove all login credentials.
-    */
-    socket.on('delete-user', (tlp) => {
-      // Get my login data
-      const { data } = getLoginCredentials();
-
-      // My login data is deleted or admin is deletes my account
-      if (!data || data.tlp == tlp) {
-        // Force me to open login page (also remove login credentials)
-        return openLoginPage();
-      }
-
-      // Admin deleted someone else
-      // ... Do something, example: change online indicator etc.
-    });
-
-    socket.on('online', onlineHandler);
-    socket.on('offline', offlineHandler);
-  }
-
   // When the page is loaded or refreshed
-  async function load() {
-    socketListener();
-
-    // Important token | login data
-    const { access_token, role, data } = getLoginCredentials();
-
-    // Get full user data
-    const user = await getUserData(data.tlp, { access_token, role });
-
-    // No user data is founded
-    if (!user) {
-      // Terminate task and force to open login page
-      return openLoginPage();
-    }
-
-    // Set user (login) data
-    dispatch(setLoginData(user));
-
-    // Remove loading animation after 3 second
+  function load() {
+    // After 3 seconds remove loading animation
     setTimeout(() => dispatch(rootRemoveLoading()), 3000);
   }
 
   useEffect(() => {
-    load();
+    // Connect to socket server, before any tasks
+    socketConnect(load);
   }, []);
 
-  if (!loginState.loginData) return null;
+  // Invisible if still loading
+  if (rootState.isLoading) return null;
 
   return (
-    <BrowserRouter>
-      <div
-        className="User"
-        style={{
-          paddingTop: GlobalStyle.navbarHeight,
-          paddingLeft: GlobalStyle.sidebarWidth,
-        }}
-      >
-        <Header globalStyle={GlobalStyle} />
-        <Sidebar
-          globalStyle={GlobalStyle}
-          serverUrl={serverUrl}
-          userData={loginState.loginData}
-        />
-        <Routes>
-          <Route path="/" element={<Homepage />} />
-          <Route path="/inventaris" element={<Inventaris />} />
-          <Route path="/laporan" element={<Laporan />} />
-        </Routes>
-        <Footer globalStyle={GlobalStyle} />
-      </div>
-    </BrowserRouter>
+    <div
+      className="User"
+      style={{
+        paddingTop: globalStyle.navbarHeight,
+        paddingLeft: globalStyle.sidebarWidth,
+      }}
+    >
+      <Header globalStyle={globalStyle} />
+      <Sidebar globalStyle={globalStyle} />
+      {onlineState.opened && <UserOnlineList globalStyle={globalStyle} />}
+      <UserOnlineListTrigger />
+      {children}
+      <Footer globalStyle={globalStyle} />
+    </div>
   );
 }
 
-function Homepage() {
-  return <h1>Homepage for User</h1>;
-}
+const UserRoutes = [
+  {
+    path: '/user',
+    element: (props: any) => {
+      return (
+        <UserGlobalTemplates socketConnect={props.socketConnect}>
+          <UserHome />
+        </UserGlobalTemplates>
+      );
+    },
+  },
+  {
+    path: '/user/inventaris',
+    element: (props: any) => (
+      <UserGlobalTemplates socketConnect={props.socketConnect}>
+        <Inventaris />
+      </UserGlobalTemplates>
+    ),
+  },
+  {
+    path: '/user/laporan',
+    element: (props: any) => (
+      <UserGlobalTemplates socketConnect={props.socketConnect}>
+        <Laporan />
+      </UserGlobalTemplates>
+    ),
+  },
+];
+
+export default UserRoutes;

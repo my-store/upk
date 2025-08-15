@@ -1,4 +1,6 @@
-import AlertReducer from './reducers/components/alert';
+import UserOnlineListReducer from './reducers/user.online-list.slice';
+import AlertReducer from './reducers/components.alert.slice';
+import UserSidebarSlice from './reducers/user.sidebar.slice';
 import SocketReducer from './reducers/socket.slice';
 import { configureStore } from '@reduxjs/toolkit';
 import LoginReducer from './reducers/login.slice';
@@ -14,7 +16,9 @@ export const store = configureStore({
     root: RootReducer,
     socket: SocketReducer,
     login: LoginReducer,
-    alert: AlertReducer,
+    component_alert: AlertReducer,
+    user_onlineList: UserOnlineListReducer,
+    user_sidebar: UserSidebarSlice,
   },
 });
 

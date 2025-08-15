@@ -27,7 +27,7 @@ import {
   Get,
 } from '@nestjs/common';
 
-// @UseGuards(AuthGuard)
+@UseGuards(AuthGuard)
 @Controller('admin')
 export class AdminController {
   constructor(private readonly service: AdminService) {}
@@ -88,6 +88,25 @@ export class AdminController {
 
     // Data yang berhasil di input ke database
     return newData;
+  }
+
+  @Get('except-me/:tlp')
+  async getAllExceptMe(@Param('tlp') tlp: string): Promise<Admin[]> {
+    let data: any;
+
+    try {
+      data = await this.service.findAll({
+        where: {
+          tlp: {
+            not: tlp,
+          },
+        },
+      });
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
+
+    return data;
   }
 
   @Get()

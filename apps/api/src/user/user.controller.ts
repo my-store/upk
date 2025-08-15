@@ -26,7 +26,7 @@ import {
   Get,
 } from '@nestjs/common';
 
-// @UseGuards(AuthGuard)
+@UseGuards(AuthGuard)
 @Controller('user')
 export class UserController {
   constructor(private readonly service: UserService) {}
@@ -94,6 +94,25 @@ export class UserController {
 
     // Data yang berhasil di input ke database
     return newData;
+  }
+
+  @Get('except-me/:tlp')
+  async getAllExceptMe(@Param('tlp') tlp: string): Promise<User[]> {
+    let data: any;
+
+    try {
+      data = await this.service.findAll({
+        where: {
+          tlp: {
+            not: tlp,
+          },
+        },
+      });
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
+
+    return data;
   }
 
   @Get()

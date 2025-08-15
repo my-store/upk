@@ -1,132 +1,157 @@
-import { disconnected } from './libs/redux/reducers/socket.slice';
+import SocketDisconnected from './components/socket-disconnected';
+import { disconnected, reconnect } from './libs/redux/reducers/socket.slice';
+import AdminNavbar from './pages/admin/templates/navbar';
+import { getLoginCredentials } from './libs/credentials';
 import { useDispatch, useSelector } from 'react-redux';
-import { FirstLoading } from './components/loading';
 import type { RootState } from './libs/redux/store';
-import { useEffect, useState } from 'react';
-import { Error, Log } from './libs/console';
+import { FirstLoading } from './components/loading';
+import Unauthorized from './pages/unauthorized';
+import NotFound from './pages/not-found';
+import { findDeepUrl } from './libs/url';
+import AdminRoutes from './pages/admin';
 import Alert from './components/alert';
-import { io } from 'socket.io-client';
+import UserRoutes from './pages/user';
 import Login from './pages/login';
-import Admin from './pages/admin';
-import Kasir from './pages/kasir';
-import User from './pages/user';
 import {
-  getLoginCredentials,
-  getAuthProfile,
-  refreshToken,
-} from './libs/credentials';
+  BrowserRouter,
+  Navigate,
+  Outlet,
+  Routes,
+  Route,
+} from 'react-router-dom';
 import './App.scss';
+import { io, type Socket } from 'socket.io-client';
+import { Log } from './libs/console';
 
-// Server configuration (this must be matched with api/.env file)
-const serverUrl: string = 'http://localhost:5000';
+export interface ProtectedLayoutInterface {
+  role: string;
+}
 
-function App() {
-  const [page, setPage] = useState(null as any);
-  const state = useSelector((state: RootState) => state.root);
+// Server URL configuration must be matched with api/.env file
+export const serverUrl: string = 'http://localhost:5000';
+
+export let socket: Socket;
+
+/* -------------------------------------------------------------
+|  PROTECTED ROUTE
+|  -------------------------------------------------------------
+*/
+function ProtectedRoutes({ role }: ProtectedLayoutInterface) {
+  const loginState = useSelector((state: RootState) => state.login);
+
+  // Not signed-in, redirect to login page
+  const deepUrl: string = findDeepUrl();
+  if (!loginState.isLogin)
+    return <Navigate to={`/?redirect=${deepUrl}`} replace />;
+
+  // Unauthorized, signed-in but requested URL is not match with its login role
+  const unauthorized_url: string = '/unauthorized';
+  if (loginState.loginRole != role)
+    return <Navigate to={unauthorized_url} replace />;
+
+  // Display page for (admin | kasir | user)
+  return <Outlet />;
+}
+
+export function NavbarRules() {
+  const loginState = useSelector((state: RootState) => state.login);
+  if (!loginState.isLogin) return null;
+  const navbar = loginState.loginRole == 'Admin' ? <AdminNavbar /> : null;
+  return navbar;
+}
+
+export default function App() {
+  const rootState = useSelector((state: RootState) => state.root);
+  const alertState = useSelector((state: RootState) => state.component_alert);
+  const connected = useSelector((state: RootState) => state.socket.connected);
   const dispatch = useDispatch();
 
-  function openLoginPage() {
-    setPage(<Login Callback={checkCredentials} serverUrl={serverUrl} />);
-  }
-
-  async function checkToken(cred: any) {
-    // Important token | login data
-    const { access_token, role, data } = cred;
-
-    // If important data is not valid
-    if (!access_token || !role || !data) {
-      // Force open login page
-      return openLoginPage();
-    }
-
-    // Check login-profile
-    const profile = await getAuthProfile(access_token);
-    if (!profile) {
-      // Dispay error message
-      Error('Token expired');
-
-      // Token expired, refresh token
-      const tokenRefreshed = await refreshToken(data.tlp);
-      // Token refresh failed
-      if (!tokenRefreshed) {
-        // Terminate process and force to open login page
-        return openLoginPage();
-      }
-
-      // Re-check credentials
-      return checkCredentials();
-    }
-
-    // SOCKET INSTANCE
-    const socket = io(serverUrl);
-
+  function socketConnect(callback: Function) {
+    socket = io(serverUrl);
     /*
-    | --------------------------------------------------------------------
+    | -----------------------------------------------------------------------
     | WHEN I'AM IS CONNECTED TO SOCKET SERVER
-    | --------------------------------------------------------------------
+    | -----------------------------------------------------------------------
     | Get my login data in local-storage and sent to server for broadcast
+    | The last step is inside socket connected listener.
+    | -----------------------------------------------------------------------
+    | NOTE:
+    | Set login state first before set ready, only if token is still active
+    | if not, will force redirect to login page, because default value
+    | of 'isLogin' is false.
+    | If not connected to the server will never redirected.
     */
     socket.on('connect', () => {
-      // Get my login data
-      const { data, role } = getLoginCredentials();
+      // If socket is reconected
+      dispatch(reconnect());
+
+      Log('Socket is now connected');
+
       // Broadcast to other, that i'm is online now
+      const { role, data } = getLoginCredentials();
       socket.emit('online', { tlp: data.tlp, role });
+
+      // Return the next logic to callback
+      callback();
     });
 
     // When socket is disconected
     socket.on('disconnect', () => {
+      Error('Socket disconnected');
+
+      // Update socket state
       dispatch(disconnected());
     });
-
-    // Buka halaman sesuai tipe/role login
-    if (role == 'Admin') {
-      setPage(
-        <Admin
-          openLoginPage={openLoginPage}
-          serverUrl={serverUrl}
-          socket={socket}
-        />,
-      );
-    } else if (role == 'User') {
-      setPage(
-        <User
-          openLoginPage={openLoginPage}
-          serverUrl={serverUrl}
-          socket={socket}
-        />,
-      );
-    } else if (role == 'Kasir') {
-      setPage(<Kasir />);
-    }
   }
-
-  function checkCredentials() {
-    // Find login data on local-storage
-    const loginCredentials = getLoginCredentials();
-
-    // User NOT signed-in
-    if (!loginCredentials) {
-      // Force open login page
-      return openLoginPage();
-    }
-
-    // Already signed-in, execute token checker
-    checkToken(loginCredentials);
-  }
-
-  useEffect(() => {
-    checkCredentials();
-  }, []);
 
   return (
-    <div className="App">
-      {state.isLoading && (
-        <FirstLoading serverUrl={serverUrl} easing="ease-in-out" />
-      )}
-      <Alert />
-      {page}
-    </div>
+    <BrowserRouter>
+      <div className="App">
+        {/* Loading animation */}
+        {rootState.isLoading && <FirstLoading easing="ease-in-out" />}
+
+        {/* Navbar */}
+        <NavbarRules />
+
+        {/* Alert box */}
+        {alertState.opened && <Alert />}
+
+        {/* SOcket connection warning */}
+        {!connected && <SocketDisconnected />}
+
+        <Routes>
+          {/* Landing page | Logic */}
+          <Route path="/" element={<Login />} />
+
+          {/* Unauthorized */}
+          <Route path="/unauthorized" element={<Unauthorized />} />
+
+          {/* Admin routes */}
+          <Route element={<ProtectedRoutes role="Admin" />}>
+            {AdminRoutes.map((adm, admx) => (
+              <Route
+                key={admx}
+                path={adm.path}
+                element={adm.element({ socketConnect })}
+              />
+            ))}
+          </Route>
+
+          {/* User routes */}
+          <Route element={<ProtectedRoutes role="User" />}>
+            {UserRoutes.map((usr, usrx) => (
+              <Route
+                key={usrx}
+                path={usr.path}
+                element={usr.element({ socketConnect })}
+              />
+            ))}
+          </Route>
+
+          {/* Catch all | Not found page */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </div>
+    </BrowserRouter>
   );
 }
-
-export default App;

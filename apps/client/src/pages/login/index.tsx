@@ -1,49 +1,46 @@
-import { rootRemoveLoading } from '../../libs/redux/reducers/root.slice';
-import { openAlert } from '../../libs/redux/reducers/components/alert';
-import { getUserData, removeLoginCredentials } from '../../libs/credentials';
+import { openAlert } from '../../libs/redux/reducers/components.alert.slice';
 import type { RootState } from '../../libs/redux/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, type CSSProperties } from 'react';
 import { JSONPost } from '../../libs/requests';
+import { Navigate } from 'react-router-dom';
+
+import {
+  rootRemoveLoading,
+  rootOpenLoading,
+} from '../../libs/redux/reducers/root.slice';
+
 import {
   finishWaitLogin,
-  updateBg,
+  login,
+  setLoginReady,
+  updateBgUrl,
   waitLogin,
 } from '../../libs/redux/reducers/login.slice';
+import { Log, Warn } from '../../libs/console';
+import { findParams } from '../../libs/url';
 import './styles/login.styles.main.scss';
+import { serverUrl } from '../../App';
+import {
+  setLoginCredentials,
+  getUserData,
+  getLoginCredentials,
+  getAuthProfile,
+  refreshToken,
+} from '../../libs/credentials';
 import $ from 'jquery';
 
-interface LoginProps {
-  serverUrl: string;
-  Callback?: any;
-}
-
-export default function Login(props: LoginProps) {
+export default function Login() {
   const loginState = useSelector((state: RootState) => state.login);
-  const { loginWait } = loginState;
+  const { loginWait, loginBgUrl } = loginState;
 
   const dispatch = useDispatch();
-  const errorSound = new Audio(`${props.serverUrl}/static/sounds/error.mp3`);
+
+  const errorAudioURL: string = `${serverUrl}/static/sounds/error.mp3`;
+  const errorSound: HTMLAudioElement = new Audio(errorAudioURL);
 
   // Background image, remove loading only when background is loaded
-  const bgUrl: string = `${props.serverUrl}/static/img/company-team.jpeg`;
-
-  useEffect(() => {
-    // Always clean localstorage before action
-    removeLoginCredentials();
-
-    // Wait background image is fully loaded,
-    // then remove loading.
-    const bg = new Image();
-    bg.onload = () => {
-      // Update background URL state
-      dispatch(updateBg(bgUrl));
-
-      // Remove loading animation after 3 second
-      setTimeout(() => dispatch(rootRemoveLoading()), 3000);
-    };
-    bg.src = bgUrl;
-  }, []);
+  const bgUrl: string = `${serverUrl}/static/img/company-team.jpeg`;
 
   function failed(msg: string): void {
     // Play error sound
@@ -121,22 +118,122 @@ export default function Login(props: LoginProps) {
         return failed('Data user tidak ditemukan');
       }
 
+      Log('Login success!');
+
       // Create login credentials on local storage
       const loginData = { ...tryLogin, data: userData };
-      localStorage.setItem('UPK.Login.Credentials', JSON.stringify(loginData));
+      setLoginCredentials(loginData);
 
-      // Trigger callback (if exist)
-      if (props.Callback) {
-        props.Callback();
-      }
+      // Re-open loading animation
+      Log('Re-open loading animation');
+      dispatch(rootOpenLoading());
+
+      // Close from login-wait state
+      Log('Reset login-wait state');
+      dispatch(finishWaitLogin());
+
+      // Reset ready state
+      Log('Reset login-ready state');
+      dispatch(setLoginReady(false));
+
+      // Set login data
+      Log('Set is-login & login-role state');
+      dispatch(login(tryLogin.role));
     } catch (error) {
       // Terminate task
       return failed(`${error}`);
     }
   }
 
+  function redirect(role: string) {
+    Log(`Redirecting to /${role.toLowerCase()} page`);
+    return dispatch(login(role));
+  }
+
+  function load() {
+    // Wait background image is fully loaded,
+    // then remove loading.
+    const bg = new Image();
+    bg.onload = async () => {
+      // Update background URL state
+      Log('Update login background');
+      dispatch(updateBgUrl(bgUrl));
+
+      // Login token checking ...
+      const savedCred = getLoginCredentials();
+      // Login data is founded in local storage
+      if (savedCred) {
+        // Check login-profile
+        const profile = await getAuthProfile(savedCred.access_token);
+
+        // Token still active
+        if (profile) {
+          // Terminate process, and force to open landing page (admin | user | kasir)
+          return redirect(savedCred.role);
+        }
+
+        // Token expired
+        else {
+          Warn('Token expired');
+
+          // Refresh token
+          const tokenRefreshed = await refreshToken(savedCred.data.tlp);
+
+          // Token is refreshed
+          if (tokenRefreshed) {
+            // Ambil token yang barusaja direfresh
+            // Metode ini dilakukan untuk mengantisipasi jika data
+            // yang tadinya user berubah menjadi admin atau sebaliknya.
+            // Jadi ambil role terbaru berdasarkan yang diberikan oleh /auth.
+            const newToken = getLoginCredentials();
+
+            // Terminate process, and force to open landing page (admin | user | kasir)
+            return redirect(newToken.role);
+          }
+        }
+      }
+
+      // Everything's ok
+      dispatch(setLoginReady(true));
+
+      // Dispaly progress message
+      Log('Login page is ready!');
+
+      // Remove loading animation after 3 second
+      setTimeout(() => dispatch(rootRemoveLoading()), 3000);
+    };
+    bg.src = bgUrl;
+  }
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  // Still not ready (isReady=false), but isLogin=true,
+  // redirect to landing page (admin | user | kasir) and also deep URL/ sub url:
+  // Example: /admin/sub-url/?and-other-parameters
+  if (loginState.isLogin) {
+    const urlRole = loginState.loginRole.toLowerCase();
+    let landing_url: string = `/${urlRole}`;
+    // Redirect\ deep URL is presented
+    const redirect: string = findParams('redirect');
+    if (redirect.length > 0) {
+      // Only if redirect URL (root) is match with the role,
+      // If not, keep landing_url as default (redirect to current role)
+      const redMatch = new RegExp(urlRole, 'g').test(urlRole);
+      if (redMatch) {
+        // Continue with requested/ redirect URL
+        landing_url = redirect;
+      }
+    }
+    return <Navigate to={landing_url} replace />;
+  }
+
+  // Wait logic to finish (both signed-in or not)
+  if (!loginState.isReady) return null;
+
   const DynamicStyles: CSSProperties = {
-    backgroundImage: `url(${loginState.loginBg})`,
+    backgroundImage: `url(${loginBgUrl})`,
   };
 
   return (

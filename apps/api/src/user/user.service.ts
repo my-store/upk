@@ -5,12 +5,16 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class UserService {
-  private readonly findOneKeys: Prisma.AdminSelect = {
+  private readonly findOneKeys: Prisma.UserSelect = {
     id: true,
     nama: true,
     tlp: true,
     password: true,
     foto: true,
+    online: true,
+    lastOnline: true,
+    active: true,
+    deactivatedAt: true,
     createdAt: true,
     updatedAt: true,
   };

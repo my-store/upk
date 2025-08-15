@@ -10,6 +10,8 @@ export class AdminService {
     nama: true,
     tlp: true,
     foto: true,
+    online: true,
+    lastOnline: true,
     createdAt: true,
     updatedAt: true,
   };
@@ -20,6 +22,8 @@ export class AdminService {
     tlp: true,
     password: true,
     foto: true,
+    online: true,
+    lastOnline: true,
     createdAt: true,
     updatedAt: true,
   };

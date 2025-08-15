@@ -1,10 +1,8 @@
-import { JSONPost } from '../../libs/requests';
+import { JSONPost } from '../../../libs/requests';
 // import { useDispatch } from 'react-redux';
 import { useState } from 'react';
 
-interface Props {}
-
-export default function AdminInsert(props: Props) {
+export default function AdminInsert() {
   // const dispatch = useDispatch();
 
   const [state, setState]: any = useState({

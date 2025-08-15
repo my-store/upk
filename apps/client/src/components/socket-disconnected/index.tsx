@@ -22,13 +22,12 @@ export default function SocketDisconnected() {
         }
       >
         <div className="socket-disconnected-header">
-          <p className="socket-disconnected-header-title">Sambungan Terputus</p>
+          <p className="socket-disconnected-header-title">Server Offline</p>
         </div>
         <div className="socket-disconnected-body">
           <p className="socket-disconnected-body-message">
-            Muat ulang halaman, jika tetap tidak ada perubahan, kemungkinan
-            konfigurasi pada server telah berubah, segera menghubungi pengembang
-            aplikasi.
+            Sambungan dengan server terputus, kemungkinan konfigurasi pada
+            server telah berubah, segera menghubungi pengembang aplikasi.
           </p>
         </div>
       </div>

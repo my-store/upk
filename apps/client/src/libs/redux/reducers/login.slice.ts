@@ -1,63 +1,71 @@
 import type { ActionInterface } from '../store';
 import { createSlice } from '@reduxjs/toolkit';
 
-interface LoginDataInterface {
-  nama: string;
-  tlp: string;
-  foto: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface DefaultStateInterface {
+interface DefaulState {
+  isReady: boolean;
+  isLogin: boolean;
+  loginRole: string;
   loginWait: boolean;
-  loginBg: string;
-  loginData: LoginDataInterface | boolean;
+  loginBgUrl: string;
 }
 
-const DefaultState: DefaultStateInterface = {
-  loginData: false,
+const DefaultLoginState: DefaulState = {
+  isReady: false,
+  isLogin: false,
+  loginRole: '',
   loginWait: false,
-  loginBg: '',
+  loginBgUrl: '',
 };
 
-function SetLoginData(state: DefaultStateInterface, action: ActionInterface) {
-  state.loginData = action.payload;
+function SetLoginReady(state: DefaulState, action: ActionInterface) {
+  state.isReady = action.payload;
 }
 
-function ResetLoginData(state: DefaultStateInterface) {
-  state.loginData = DefaultState.loginData;
+function Login(state: DefaulState, action: ActionInterface) {
+  state.isLogin = true;
+  state.loginRole = action.payload;
 }
 
-function WaitLogin(state: DefaultStateInterface) {
+function Logout(state: DefaulState) {
+  state.isLogin = false;
+  state.loginRole = '';
+
+  // Dont for get to remove deep URL first
+  window.history.pushState({}, '', '/');
+}
+
+function WaitLogin(state: DefaulState) {
   state.loginWait = true;
 }
 
-function FinishWaitLogin(state: DefaultStateInterface) {
+function FinishWaitLogin(state: DefaulState) {
   state.loginWait = false;
 }
 
-function UpdateBg(state: DefaultStateInterface, action: ActionInterface) {
-  state.loginBg = action.payload;
+function UpdateBgUrl(state: DefaulState, action: ActionInterface) {
+  state.loginBgUrl = action.payload;
 }
 
 const LoginSlice = createSlice({
   name: 'login',
-  initialState: DefaultState,
+  initialState: DefaultLoginState,
   reducers: {
+    login: Login,
+    logout: Logout,
     waitLogin: WaitLogin,
     finishWaitLogin: FinishWaitLogin,
-    updateBg: UpdateBg,
-    setLoginData: SetLoginData,
-    resetLoginData: ResetLoginData,
+    setLoginReady: SetLoginReady,
+
+    updateBgUrl: UpdateBgUrl,
   },
 });
 
 export const {
+  login,
+  logout,
   waitLogin,
   finishWaitLogin,
-  updateBg,
-  setLoginData,
-  resetLoginData,
+  setLoginReady,
+  updateBgUrl,
 } = LoginSlice.actions;
 export default LoginSlice.reducer;

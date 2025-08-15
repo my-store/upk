@@ -1,10 +1,10 @@
-import { removeAlert } from '../../libs/redux/reducers/components/alert';
-import { useDispatch, useSelector } from 'react-redux';
+import { removeAlert } from '../../libs/redux/reducers/components.alert.slice';
 import type { RootState } from '../../libs/redux/store';
-import './alert.styles.scss';
+import { useDispatch, useSelector } from 'react-redux';
+import './styles/components.alert.styles.main.scss';
 
 export default function Alert() {
-  const alertState = useSelector((state: RootState) => state.alert);
+  const alertState = useSelector((state: RootState) => state.component_alert);
   const dispatch = useDispatch();
 
   const { opened, type, title, body } = alertState;
