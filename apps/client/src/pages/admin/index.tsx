@@ -15,6 +15,7 @@ function AdminGlobalTemplates({ children, socketConnect }: any) {
 
   function socketListener() {}
 
+  // When the page is loaded or refreshed
   async function load() {
     socketListener();
 

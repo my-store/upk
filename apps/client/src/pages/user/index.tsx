@@ -39,8 +39,12 @@ function UserGlobalTemplates({ children, socketConnect }: any) {
   const onlineState = useSelector((state: RootState) => state.user_onlineList);
   const dispatch = useDispatch();
 
+  function socketListener() {}
+
   // When the page is loaded or refreshed
-  function load() {
+  async function load() {
+    socketListener();
+
     // After 3 seconds remove loading animation
     setTimeout(() => dispatch(rootRemoveLoading()), 3000);
   }
