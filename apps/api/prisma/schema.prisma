@@ -39,6 +39,8 @@ model Admin {
   KasSpp               KasSpp[]
   BankSppBrebes        BankSppBrebes[]
   BankSppJateng        BankSppJateng[]
+  Iventaris            Iventaris[]
+  AsetTetap            AsetTetap[]
 }
 
 model User {
@@ -70,6 +72,8 @@ model User {
   KasSpp               KasSpp[]
   BankSppBrebes        BankSppBrebes[]
   BankSppJateng        BankSppJateng[]
+  Iventaris            Iventaris[]
+  AsetTetap            AsetTetap[]
 }
 
 model Kasir {
@@ -101,6 +105,8 @@ model Kasir {
   KasSpp               KasSpp[]
   BankSppBrebes        BankSppBrebes[]
   BankSppJateng        BankSppJateng[]
+  Iventaris            Iventaris[]
+  AsetTetap            AsetTetap[]
 }
 
 model BankOperasionalBkk {
@@ -367,4 +373,34 @@ model BankSppJateng {
   // Dibawah ini, beberapa kolom yang perlu dipertanyakan fungsinya
   saldoRekSpp       Int?
   ketSaldoAwalTahun Int?
+}
+
+model Iventaris {
+  id         Int      @id @default(autoincrement())
+  keterangan String
+  createdAt  DateTime
+  updatedAt  DateTime
+
+  // Parent table (who create or change this data)
+  Admin   Admin? @relation(fields: [adminId], references: [id])
+  adminId Int?
+  User    User?  @relation(fields: [userId], references: [id])
+  userId  Int?
+  Kasir   Kasir? @relation(fields: [kasirId], references: [id])
+  kasirId Int?
+}
+
+model AsetTetap {
+  id         Int      @id @default(autoincrement())
+  keterangan String
+  createdAt  DateTime
+  updatedAt  DateTime
+
+  // Parent table (who create or change this data)
+  Admin   Admin? @relation(fields: [adminId], references: [id])
+  adminId Int?
+  User    User?  @relation(fields: [userId], references: [id])
+  userId  Int?
+  Kasir   Kasir? @relation(fields: [kasirId], references: [id])
+  kasirId Int?
 }
