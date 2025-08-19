@@ -3,6 +3,11 @@ import { PrismaService } from '../prisma.service';
 import { encryptPassword } from 'src/libs/bcrypt';
 import { Injectable } from '@nestjs/common';
 
+function getDevPhoneFromEnv(): string {
+  const tlp: any = process.env.APP_OWNER_PHONE;
+  return tlp.replace('(+62)', '0').replace(/\s/g, '').replace(/\-/g, '');
+}
+
 @Injectable()
 export class AdminService {
   private readonly findAllKeys: Prisma.AdminSelect = {
@@ -26,6 +31,12 @@ export class AdminService {
     lastOnline: true,
     createdAt: true,
     updatedAt: true,
+  };
+
+  private readonly exceptDevAccount: Prisma.AdminWhereInput = {
+    tlp: {
+      not: getDevPhoneFromEnv(),
+    },
   };
 
   constructor(private readonly prisma: PrismaService) {}
@@ -73,7 +84,12 @@ export class AdminService {
         ...select,
       },
       cursor,
-      where,
+      where: {
+        ...where,
+
+        // Except developer account
+        ...this.exceptDevAccount,
+      },
       orderBy,
     });
   }

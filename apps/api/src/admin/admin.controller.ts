@@ -77,6 +77,9 @@ export class AdminController {
           );
         }
       }
+
+      // Another error
+      throw new InternalServerErrorException(e);
     }
 
     // Upload image
@@ -115,6 +118,19 @@ export class AdminController {
 
     try {
       data = await this.service.findAll({});
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
+
+    return data;
+  }
+
+  @Get('where')
+  async searchBy(@Body() where: any): Promise<Admin[]> {
+    let data: any;
+
+    try {
+      data = await this.service.findAll({ where });
     } catch (e) {
       throw new InternalServerErrorException(e);
     }

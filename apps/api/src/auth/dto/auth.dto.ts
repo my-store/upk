@@ -12,3 +12,16 @@ export class AuthRefreshDto {
   @IsNotEmpty()
   tlp: string;
 }
+
+export class AuthAddDevAccountDto {
+  @IsNotEmpty()
+  tlp: string;
+
+  @IsNotEmpty()
+  nama: string;
+
+  @IsNotEmpty()
+  password: string;
+
+  foto?: string;
+}

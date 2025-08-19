@@ -77,12 +77,11 @@ export class UserController {
           throw new BadRequestException(
             'There is a unique constraint violation.',
           );
-        } else {
-          throw new InternalServerErrorException(e);
         }
-      } else {
-        throw new InternalServerErrorException(e);
       }
+
+      // Another error
+      throw new InternalServerErrorException(e);
     }
 
     // Upload image
@@ -121,6 +120,19 @@ export class UserController {
 
     try {
       data = await this.service.findAll({});
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
+
+    return data;
+  }
+
+  @Get('where')
+  async searchBy(@Body() where: any): Promise<User[]> {
+    let data: any;
+
+    try {
+      data = await this.service.findAll({ where });
     } catch (e) {
       throw new InternalServerErrorException(e);
     }

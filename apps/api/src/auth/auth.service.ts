@@ -76,6 +76,10 @@ export class AuthService {
     return { access_token, role };
   }
 
+  async addDevAccount(data: any): Promise<Admin> {
+    return this.admin.create(data);
+  }
+
   async refresh(tlp: string): Promise<void> {
     // Ambil data user/admin
     const { data, role }: any = await this.findAdminOrUser(tlp);
