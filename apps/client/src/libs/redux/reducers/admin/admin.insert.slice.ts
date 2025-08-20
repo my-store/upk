@@ -1,5 +1,5 @@
+import type { ActionInterface } from '../../store';
 import { createSlice } from '@reduxjs/toolkit';
-import type { ActionInterface } from '../store';
 
 interface DefaultAdminInsertStateInterface {
   nama: string;
