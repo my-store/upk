@@ -2,9 +2,9 @@ import { UserOnlineList, UserOnlineListTrigger } from './templates/online-list';
 import { rootRemoveLoading } from '../../libs/redux/reducers/root.slice';
 import type { RootState } from '../../libs/redux/store';
 import { useDispatch, useSelector } from 'react-redux';
-import Sidebar from './templates/sidebar';
+import UserSidebar from './templates/sidebar';
 import Footer from './templates/footer';
-import Header from './templates/header';
+import UserHeader from './templates/header';
 import Inventaris from './inventaris';
 import { useEffect } from 'react';
 import './user.styles.main.scss';
@@ -26,16 +26,10 @@ const globalStyle: UserGlobalStyleInterface = {
 };
 
 function UserHome() {
-  useEffect(() => {
-    // Force scrolll to top
-    $('html, body').animate({ scrollTop: 0 }, 'fast');
-  }, []);
-
   return <h1>Homepage for User</h1>;
 }
 
 function UserGlobalTemplates({ children, socketConnect }: any) {
-  const rootState = useSelector((state: RootState) => state.root);
   const onlineState = useSelector((state: RootState) => state.user_onlineList);
   const dispatch = useDispatch();
 
@@ -50,12 +44,12 @@ function UserGlobalTemplates({ children, socketConnect }: any) {
   }
 
   useEffect(() => {
+    // Force scrolll to top
+    $('html, body').animate({ scrollTop: 0 }, 'fast');
+
     // Connect to socket server, before any tasks
     socketConnect(load);
   }, []);
-
-  // Invisible if still loading
-  if (rootState.isLoading) return null;
 
   return (
     <div
@@ -65,8 +59,8 @@ function UserGlobalTemplates({ children, socketConnect }: any) {
         paddingLeft: globalStyle.sidebarWidth,
       }}
     >
-      <Header globalStyle={globalStyle} />
-      <Sidebar globalStyle={globalStyle} />
+      <UserHeader globalStyle={globalStyle} />
+      <UserSidebar globalStyle={globalStyle} />
       {onlineState.opened && <UserOnlineList globalStyle={globalStyle} />}
       <UserOnlineListTrigger />
       {children}

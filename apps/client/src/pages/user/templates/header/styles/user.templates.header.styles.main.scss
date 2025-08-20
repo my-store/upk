@@ -1,6 +1,6 @@
 .App {
   .User {
-    header {
+    .User-Navbar {
       width: 100%;
       position: fixed;
       left: 0px;
@@ -11,12 +11,12 @@
       display: flex;
       justify-content: space-between;
 
-      h1 {
+      .User-Navbar-Title {
         font-size: 25px;
         width: 100%;
       }
 
-      .links {
+      .User-Navbar-Link-Container {
         display: flex;
         align-items: center;
 

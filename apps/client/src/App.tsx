@@ -1,16 +1,15 @@
-import SocketDisconnected from './components/socket-disconnected';
-import { disconnected, reconnect } from './libs/redux/reducers/socket.slice';
-import AdminNavbar from './pages/admin/templates/navbar';
 import { getLoginCredentials } from './libs/credentials';
-import { useDispatch, useSelector } from 'react-redux';
 import type { RootState } from './libs/redux/store';
 import { FirstLoading } from './components/loading';
+import { io, type Socket } from 'socket.io-client';
 import Unauthorized from './pages/unauthorized';
+import { useSelector } from 'react-redux';
 import NotFound from './pages/not-found';
 import { findDeepUrl } from './libs/url';
 import AdminRoutes from './pages/admin';
 import Alert from './components/alert';
 import UserRoutes from './pages/user';
+import { Log } from './libs/console';
 import Login from './pages/login';
 import {
   BrowserRouter,
@@ -20,8 +19,6 @@ import {
   Route,
 } from 'react-router-dom';
 import './App.scss';
-import { io, type Socket } from 'socket.io-client';
-import { Log } from './libs/console';
 
 export interface ProtectedLayoutInterface {
   role: string;
@@ -53,18 +50,9 @@ function ProtectedRoutes({ role }: ProtectedLayoutInterface) {
   return <Outlet />;
 }
 
-export function NavbarRules() {
-  const loginState = useSelector((state: RootState) => state.login);
-  if (!loginState.isLogin) return null;
-  const navbar = loginState.loginRole == 'Admin' ? <AdminNavbar /> : null;
-  return navbar;
-}
-
 export default function App() {
   const rootState = useSelector((state: RootState) => state.root);
   const alertState = useSelector((state: RootState) => state.component_alert);
-  const connected = useSelector((state: RootState) => state.socket.connected);
-  const dispatch = useDispatch();
 
   function socketConnect(callback: Function) {
     socket = io(serverUrl);
@@ -82,9 +70,6 @@ export default function App() {
     | If not connected to the server will never redirected.
     */
     socket.on('connect', () => {
-      // If socket is reconected
-      dispatch(reconnect());
-
       Log('Socket is now connected');
 
       // Broadcast to other, that i'm is online now
@@ -98,9 +83,6 @@ export default function App() {
     // When socket is disconected
     socket.on('disconnect', () => {
       Error('Socket disconnected');
-
-      // Update socket state
-      dispatch(disconnected());
     });
   }
 
@@ -110,14 +92,8 @@ export default function App() {
         {/* Loading animation */}
         {rootState.isLoading && <FirstLoading easing="ease-in-out" />}
 
-        {/* Navbar */}
-        <NavbarRules />
-
         {/* Alert box */}
         {alertState.opened && <Alert />}
-
-        {/* SOcket connection warning */}
-        {!connected && <SocketDisconnected />}
 
         <Routes>
           {/* Landing page | Logic */}

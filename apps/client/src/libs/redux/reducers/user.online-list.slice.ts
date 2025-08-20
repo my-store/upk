@@ -26,15 +26,18 @@ function OnlineOffline(
   state: DefaultUserOnlineList,
   options: OnlineOfflineOptions,
 ) {
-  let new_data = [];
-  for (let d of state.data) {
-    let nd = { ...d };
-    if (options.tlp == d.tlp) {
-      nd.online = options.active;
+  const matched = state.data.find((d) => d.tlp == options.tlp);
+  if (matched) {
+    let new_data = [];
+    for (let d of state.data) {
+      let nd = { ...d };
+      if (options.tlp == d.tlp) {
+        nd.online = options.active;
+      }
+      new_data.push(nd);
     }
-    new_data.push(nd);
+    state.data = new_data;
   }
-  state.data = new_data;
 }
 
 function SetOnline(state: DefaultUserOnlineList, action: ActionInterface) {

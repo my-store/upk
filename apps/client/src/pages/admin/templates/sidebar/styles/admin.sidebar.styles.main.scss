@@ -1,6 +1,6 @@
 .App {
-  .User {
-    .User-Sidebar {
+  .Admin {
+    .Admin-Sidebar {
       position: fixed;
       height: 100vh;
       left: 0px;
@@ -13,7 +13,7 @@
       align-items: center;
       flex-direction: column;
 
-      .User-Sidebar-Profile-Container {
+      .Admin-Sidebar-Profile-Container {
         width: 100%;
         display: flex;
         align-items: center;
@@ -21,12 +21,12 @@
         padding-bottom: 5px;
         border-bottom: 1px solid #c1c1c1;
 
-        .User-Sidebar-Profile-Photo-Container {
+        .Admin-Sidebar-Profile-Photo-Container {
           display: flex;
           align-items: center;
           justify-content: center;
 
-          .User-Sidebar-Profile-Photo-Image {
+          .Admin-Sidebar-Profile-Photo-Image {
             border-radius: 10px;
             background: #f1f1f1;
             // background-image: url('https://r2.erweima.ai/imgcompressed/img/compressed_e732d27392855249bb07cfd89ccf9353.webp');
@@ -36,11 +36,11 @@
           }
         }
 
-        .User-Sidebar-Profile-Info-Container {
+        .Admin-Sidebar-Profile-Info-Container {
           width: 100%;
           text-align: center;
 
-          .User-Sidebar-Profile-Info-Name {
+          .Admin-Sidebar-Profile-Info-Name {
             font-size: 16px;
             line-height: 16px;
             margin-bottom: 5px;
@@ -48,7 +48,7 @@
             letter-spacing: 0.3px;
           }
 
-          .User-Sidebar-Profile-Info-Email {
+          .Admin-Sidebar-Profile-Info-Email {
             font-size: 13.5px;
             line-height: 13.5px;
             margin-bottom: 5px;
@@ -57,7 +57,7 @@
         }
       }
 
-      .User-Sidebar-Button-Container {
+      .Admin-Sidebar-Button-Container {
         width: 100%;
         overflow-y: scroll;
         flex: 1;

@@ -1,3 +1,4 @@
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Admin, Prisma } from 'generated/prisma';
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
@@ -8,13 +9,9 @@ import {
   UploadFile,
 } from 'src/libs/upload-file-handler';
 import {
-  AuthAddDevAccountDto,
-  AuthRefreshDto,
-  AuthLoginDto,
-} from './dto/auth.dto';
-import {
   InternalServerErrorException,
   BadRequestException,
+  UseInterceptors,
   UploadedFile,
   Controller,
   UseGuards,
@@ -23,6 +20,11 @@ import {
   Post,
   Get,
 } from '@nestjs/common';
+import {
+  AuthAddDevAccountDto,
+  AuthRefreshDto,
+  AuthLoginDto,
+} from './dto/auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -39,6 +41,7 @@ export class AuthController {
   }
 
   @Post('add-dev-account')
+  @UseInterceptors(FileInterceptor('foto'))
   async addDevAccount(
     @Body() data: AuthAddDevAccountDto,
     @UploadedFile()

@@ -1,3 +1,4 @@
+import { Admin, Kasir, User } from 'generated/prisma';
 import { Server, Socket } from 'socket.io';
 import { AppService } from './app.service';
 import {
@@ -10,7 +11,6 @@ import {
   OnGatewayInit,
   MessageBody,
 } from '@nestjs/websockets';
-import { Admin, Kasir, User } from 'generated/prisma';
 
 interface OnlineBody {
   tlp: string;
@@ -36,6 +36,7 @@ export class AppGateway
 
   handleConnection(@ConnectedSocket() client: Socket) {}
 
+  // Only for signed-in users (admin, user & kasir)
   async handleDisconnect(@ConnectedSocket() client: Socket) {
     // Find for matched user
     const matchedUser = this.users.find((u) => u.socket == client);
@@ -49,19 +50,20 @@ export class AppGateway
       // Except videotron
       if (matchedUser.role != 'Videotron') {
         // Update online status to false
-        await this.offline(
-          { tlp: matchedUser.tlp, role: matchedUser.role },
-          client,
-        );
+        await this.service.logout(matchedUser.tlp, matchedUser.role);
+
+        // Broadcast to all connected devices except me
+        this.broadcast('offline', matchedUser.tlp, client);
       }
     }
   }
 
-  crudHandler(event: string, data: any, client: Socket) {
+  broadcast(event: string, data: any, client: Socket) {
     // Broadcast to all connected devices except me
     client.broadcast.emit(event, data);
   }
 
+  // Only for signed-in users (admin, user & kasir)
   @SubscribeMessage('online')
   async online(
     @MessageBody() { tlp, role }: OnlineBody,
@@ -81,20 +83,9 @@ export class AppGateway
         await this.service.login(tlp, role);
 
         // Broadcast to all connected devices except me
-        client.broadcast.emit('online', tlp);
+        this.broadcast('online', tlp, client);
       }
     }
-  }
-
-  @SubscribeMessage('offline')
-  async offline(
-    @MessageBody() { tlp, role }: OnlineBody,
-    @ConnectedSocket() client: Socket,
-  ): Promise<void> {
-    await this.service.logout(tlp, role);
-
-    // Broadcast to all connected devices except me
-    client.broadcast.emit('offline', tlp);
   }
 
   @SubscribeMessage('new-admin')
@@ -102,7 +93,7 @@ export class AppGateway
     @MessageBody() data: Admin,
     @ConnectedSocket() client: Socket,
   ): Promise<void> {
-    this.crudHandler('new-admin', data, client);
+    this.broadcast('new-admin', data, client);
   }
 
   @SubscribeMessage('update-admin')
@@ -110,7 +101,7 @@ export class AppGateway
     @MessageBody() data: Admin,
     @ConnectedSocket() client: Socket,
   ): Promise<void> {
-    this.crudHandler('update-admin', data, client);
+    this.broadcast('update-admin', data, client);
   }
 
   @SubscribeMessage('delete-admin')
@@ -118,7 +109,7 @@ export class AppGateway
     @MessageBody() data: Admin,
     @ConnectedSocket() client: Socket,
   ): Promise<void> {
-    this.crudHandler('delete-admin', data, client);
+    this.broadcast('delete-admin', data, client);
   }
 
   @SubscribeMessage('new-user')
@@ -126,7 +117,7 @@ export class AppGateway
     @MessageBody() data: User,
     @ConnectedSocket() client: Socket,
   ): Promise<void> {
-    this.crudHandler('new-user', data, client);
+    this.broadcast('new-user', data, client);
   }
 
   @SubscribeMessage('update-user')
@@ -134,7 +125,7 @@ export class AppGateway
     @MessageBody() data: User,
     @ConnectedSocket() client: Socket,
   ): Promise<void> {
-    this.crudHandler('update-user', data, client);
+    this.broadcast('update-user', data, client);
   }
 
   @SubscribeMessage('delete-user')
@@ -142,7 +133,7 @@ export class AppGateway
     @MessageBody() data: User,
     @ConnectedSocket() client: Socket,
   ): Promise<void> {
-    this.crudHandler('delete-user', data, client);
+    this.broadcast('delete-user', data, client);
   }
 
   @SubscribeMessage('new-kasir')
@@ -150,7 +141,7 @@ export class AppGateway
     @MessageBody() data: Kasir,
     @ConnectedSocket() client: Socket,
   ): Promise<void> {
-    this.crudHandler('new-kasir', data, client);
+    this.broadcast('new-kasir', data, client);
   }
 
   @SubscribeMessage('update-kasir')
@@ -158,7 +149,7 @@ export class AppGateway
     @MessageBody() data: Kasir,
     @ConnectedSocket() client: Socket,
   ): Promise<void> {
-    this.crudHandler('update-kasir', data, client);
+    this.broadcast('update-kasir', data, client);
   }
 
   @SubscribeMessage('delete-kasir')
@@ -166,6 +157,6 @@ export class AppGateway
     @MessageBody() data: Kasir,
     @ConnectedSocket() client: Socket,
   ): Promise<void> {
-    this.crudHandler('delete-kasir', data, client);
+    this.broadcast('delete-kasir', data, client);
   }
 }

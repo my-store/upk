@@ -1,26 +1,26 @@
-import { userSidebarSetUserData } from '../../../../libs/redux/reducers/user.sidebar.slice';
+import { adminSidebarSetAdminData } from '../../../../libs/redux/reducers/admin/admin.sidebar.slice';
 import { rootOpenLoading } from '../../../../libs/redux/reducers/root.slice';
 import { logout } from '../../../../libs/redux/reducers/login.slice';
 import type { RootState } from '../../../../libs/redux/store';
-import './styles/user.templates.sidebar.styles.main.scss';
-import { useDispatch, useSelector } from 'react-redux';
-import type { UserGlobalStyleInterface } from '../..';
+import { useSelector, useDispatch } from 'react-redux';
+import type { AdminGlobalStyleInterface } from '../..';
 import { serverUrl, socket } from '../../../../App';
-import { useNavigate } from 'react-router';
+import './styles/admin.sidebar.styles.main.scss';
+import { useNavigate } from 'react-router-dom';
 import {
   removeLoginCredentials,
   getLoginCredentials,
 } from '../../../../libs/credentials';
 import { useEffect } from 'react';
 
-interface UserSidebarProps {
-  globalStyle: UserGlobalStyleInterface;
+interface AdminSidebarProps {
+  globalStyle: AdminGlobalStyleInterface;
 }
 
-export default function UserSidebar(props: UserSidebarProps) {
+export default function AdminSidebar(props: AdminSidebarProps) {
   const { globalStyle } = props;
 
-  const sidebarState = useSelector((state: RootState) => state.user_sidebar);
+  const sidebarState = useSelector((state: RootState) => state.admin_sidebar);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -35,7 +35,7 @@ export default function UserSidebar(props: UserSidebarProps) {
 
   function load() {
     const { data } = getLoginCredentials();
-    dispatch(userSidebarSetUserData(data));
+    dispatch(adminSidebarSetAdminData(data));
   }
 
   function prepareLogout() {
@@ -56,62 +56,62 @@ export default function UserSidebar(props: UserSidebarProps) {
     load();
   }, []);
 
-  // Terminate if user-login-data is null
-  if (!sidebarState.userData) return null;
+  // Terminate if admin-login-data is null
+  if (!sidebarState.adminData) return null;
 
   return (
     <div
-      className="User-Sidebar"
+      className="Admin-Sidebar"
       style={{
         paddingTop: `${navbarHeight}px`,
         width: `${sidebarWidth}px`,
       }}
     >
-      <div className="User-Sidebar-Profile-Container">
+      <div className="Admin-Sidebar-Profile-Container">
         <div
-          className="User-Sidebar-Profile-Photo-Container"
+          className="Admin-Sidebar-Profile-Photo-Container"
           style={{
             width: `${sidebarWidth}px`,
             height: `${sidebarWidth}px`,
           }}
         >
           <div
-            className="User-Sidebar-Profile-Photo-Image"
+            className="Admin-Sidebar-Profile-Photo-Image"
             style={{
               width: `${sidebarWidth - 15}px`,
               height: `${sidebarWidth - 15}px`,
-              backgroundImage: `url(${serverUrl + '/static' + sidebarState.userData.foto})`,
+              backgroundImage: `url(${serverUrl + '/static' + sidebarState.adminData.foto})`,
             }}
           ></div>
         </div>
-        <div className="User-Sidebar-Profile-Info-Container">
-          <p className="User-Sidebar-Profile-Info-Name">
-            {sidebarState.userData.nama}
+        <div className="Admin-Sidebar-Profile-Info-Container">
+          <p className="Admin-Sidebar-Profile-Info-Name">
+            {sidebarState.adminData.nama}
           </p>
-          <p className="User-Sidebar-Profile-Info-Email">
-            {sidebarState.userData.tlp}
+          <p className="Admin-Sidebar-Profile-Info-Email">
+            {sidebarState.adminData.tlp}
           </p>
         </div>
       </div>
 
-      <div className="User-Sidebar-Button-Container">
+      <div className="Admin-Sidebar-Button-Container">
         <button
           style={{ color: primaryColor }}
-          onClick={() => navigate('/user')}
+          onClick={() => navigate('/admin')}
         >
           Beranda
         </button>
         <button
           style={{ color: primaryColor }}
-          onClick={() => navigate('/user/inventaris')}
+          onClick={() => navigate('/admin/admin')}
         >
-          Inventaris
+          Admin
         </button>
         <button
           style={{ color: primaryColor }}
-          onClick={() => navigate('/user/laporan')}
+          onClick={() => navigate('/admin/user')}
         >
-          Laporan
+          Staf
         </button>
         <button
           style={{ color: primaryColor }}
@@ -120,7 +120,7 @@ export default function UserSidebar(props: UserSidebarProps) {
             prepareLogout();
           }}
         >
-          Laporan
+          Logout
         </button>
       </div>
     </div>

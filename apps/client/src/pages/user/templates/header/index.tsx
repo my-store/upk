@@ -5,7 +5,7 @@ interface FooterProps {
   globalStyle: any;
 }
 
-export default function Header(props: FooterProps) {
+export default function UserHeader(props: FooterProps) {
   const { globalStyle } = props;
 
   // Navbar config
@@ -20,13 +20,14 @@ export default function Header(props: FooterProps) {
 
   return (
     <header
+      className="User-Navbar"
       style={{
         backgroundColor: primaryColor,
         height: navbarHeight,
       }}
     >
-      <h1>Permata Kasir</h1>
-      <div className="links">
+      <p className="User-Navbar-Title">Permata Kasir</p>
+      <div className="User-Navbar-Link-Container">
         <button style={globalButtonStyle}>Youtube</button>
         <button style={globalButtonStyle}>Facebook</button>
         <button style={globalButtonStyle}>WhatsApp</button>

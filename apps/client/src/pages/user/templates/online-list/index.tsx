@@ -44,7 +44,10 @@ export function UserOnlineListTrigger() {
 
     // Token expired
     if (admin.message || user.message) {
-      await refreshToken(data.tlp as any);
+      // Refresh login token
+      await refreshToken(data.tlp);
+
+      // Re-call this function
       return loadOnline();
     }
 

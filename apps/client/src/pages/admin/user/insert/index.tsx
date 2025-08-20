@@ -1,22 +1,25 @@
-import { openAlert } from '../../../libs/redux/reducers/components.alert.slice';
-import { getLoginCredentials, refreshToken } from '../../../libs/credentials';
+import { openAlert } from '../../../../libs/redux/reducers/components.alert.slice';
 import {
-  adminInsertSetPassword,
-  adminInsertSetWait,
-  adminInsertSetFoto,
-  adminInsertSetNama,
-  adminInsertSetTlp,
-} from '../../../libs/redux/reducers/admin/admin.insert.slice';
-import type { RootState } from '../../../libs/redux/store';
+  userInsertSetPassword,
+  userInsertSetWait,
+  userInsertSetFoto,
+  userInsertSetNama,
+  userInsertSetTlp,
+} from '../../../../libs/redux/reducers/admin/user.insert.slice';
+import type { RootState } from '../../../../libs/redux/store';
 import { useDispatch, useSelector } from 'react-redux';
-import { JSONPost } from '../../../libs/requests';
-import './styles/admin.insert.style.main.scss';
+import { JSONPost } from '../../../../libs/requests';
+import './styles/admin.user.insert.styles.main.scss';
 import { useNavigate } from 'react-router-dom';
-import { serverUrl } from '../../../App';
+import { serverUrl } from '../../../../App';
+import {
+  getLoginCredentials,
+  refreshToken,
+} from '../../../../libs/credentials';
 import $ from 'jquery';
 
-export default function AdminInsert() {
-  const state = useSelector((state: RootState) => state.admin_insert);
+export default function UserInsert() {
+  const state = useSelector((state: RootState) => state.admin_user_insert);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -31,13 +34,13 @@ export default function AdminInsert() {
     dispatch(
       openAlert({
         type: 'Error',
-        title: 'Gagal menambahkan admin baru',
+        title: 'Gagal menambahkan user baru',
         body: msg,
       }),
     );
 
     // Close from insert-wait state
-    dispatch(adminInsertSetWait(false));
+    dispatch(userInsertSetWait(false));
   }
 
   async function insert() {
@@ -45,16 +48,18 @@ export default function AdminInsert() {
     if (state.insertWait) return;
 
     // Force user to wait until insert logic is finished
-    dispatch(adminInsertSetWait(true));
+    dispatch(userInsertSetWait(true));
 
     const { nama, tlp, password, foto } = state;
 
-    if (nama.length < 1) return failed('Silahkan isi nama admin');
-    if (tlp.length < 1) return failed('Silahkan isi no tlp admin');
-    if (password.length < 1) return failed('Silahkan isi password admin');
-    if (foto.length < 1) return failed('Silahkan pilih foto admin');
+    if (nama.length < 1) return failed('Silahkan isi nama user');
+    if (tlp.length < 1) return failed('Silahkan isi no tlp user');
+    if (password.length < 1) return failed('Silahkan isi password user');
+    if (foto.length < 1) return failed('Silahkan pilih foto user');
 
-    const imageInput: any = $('.Admin-Insert-Form-Image input[name="foto"]')[0];
+    const imageInput: any = $(
+      '.Admin-User-Insert-Form-Image input[name="foto"]',
+    )[0];
 
     const formData = new FormData();
     formData.append('nama', nama);
@@ -66,7 +71,7 @@ export default function AdminInsert() {
     const { access_token, data } = getLoginCredentials();
 
     // Insert data
-    const insertReq = await JSONPost('/api/admin', {
+    const insertReq = await JSONPost('/api/user', {
       headers: { Authorization: `Bearer ${access_token}` },
       body: formData,
     });
@@ -77,7 +82,7 @@ export default function AdminInsert() {
       await refreshToken(data.tlp);
 
       // Close from insert-wait state
-      dispatch(adminInsertSetWait(false));
+      dispatch(userInsertSetWait(false));
 
       // Re-call this function
       return insert();
@@ -89,7 +94,7 @@ export default function AdminInsert() {
     dispatch(
       openAlert({
         type: 'Success',
-        title: 'Admin baru berhasil ditambahkan',
+        title: 'User baru berhasil ditambahkan',
         body: `Nama: ${nama}\nTlp: ${tlp}`,
       }),
     );
@@ -99,13 +104,13 @@ export default function AdminInsert() {
   }
 
   function resetForm() {
-    dispatch(adminInsertSetNama(''));
-    dispatch(adminInsertSetTlp(''));
-    dispatch(adminInsertSetPassword(''));
-    dispatch(adminInsertSetFoto(''));
+    dispatch(userInsertSetNama(''));
+    dispatch(userInsertSetTlp(''));
+    dispatch(userInsertSetPassword(''));
+    dispatch(userInsertSetFoto(''));
 
     // Close from insert-wait state
-    dispatch(adminInsertSetWait(false));
+    dispatch(userInsertSetWait(false));
   }
 
   // function validate() {}
@@ -113,40 +118,40 @@ export default function AdminInsert() {
   // function listenChange() {}
 
   return (
-    <div className="Admin-Insert">
-      <div className="Admin-Insert-Box">
+    <div className="Admin-User-Insert">
+      <div className="Admin-User-Insert-Box">
         <form onSubmit={(e) => e.preventDefault()} method="POST">
-          <div className="Admin-Insert-Form-Group">
+          <div className="Admin-User-Insert-Form-Group">
             <label>Nama</label>
             <input
               type="text"
               name="nama"
               defaultValue={state.nama}
-              onChange={(e) => dispatch(adminInsertSetNama(e.target.value))}
+              onChange={(e) => dispatch(userInsertSetNama(e.target.value))}
             />
           </div>
 
-          <div className="Admin-Insert-Form-Group">
+          <div className="Admin-User-Insert-Form-Group">
             <label>Tlp</label>
             <input
               type="text"
               name="tlp"
               defaultValue={state.tlp}
-              onChange={(e) => dispatch(adminInsertSetTlp(e.target.value))}
+              onChange={(e) => dispatch(userInsertSetTlp(e.target.value))}
             />
           </div>
 
-          <div className="Admin-Insert-Form-Group">
+          <div className="Admin-User-Insert-Form-Group">
             <label>Katasandi</label>
             <input
               type="text"
               name="password"
               defaultValue={state.password}
-              onChange={(e) => dispatch(adminInsertSetPassword(e.target.value))}
+              onChange={(e) => dispatch(userInsertSetPassword(e.target.value))}
             />
           </div>
 
-          <div className="Admin-Insert-Form-Image">
+          <div className="Admin-User-Insert-Form-Image">
             <input
               type="file"
               name="foto"
@@ -156,33 +161,33 @@ export default function AdminInsert() {
                 }
                 const reader = new FileReader();
                 reader.onload = (evt) => {
-                  dispatch(adminInsertSetFoto(evt.target?.result));
+                  dispatch(userInsertSetFoto(evt.target?.result));
                 };
                 reader.readAsDataURL(e.target.files[0]);
               }}
             />
             <div
-              className="Admin-Insert-Form-Image-Preview"
+              className="Admin-User-Insert-Form-Image-Preview"
               style={{
                 backgroundImage:
                   state.foto.length > 0 ? `url(${state.foto})` : '',
               }}
               onClick={() => {
                 const imageInput = $(
-                  ".Admin-Insert-Form-Image input[name='foto']",
+                  ".Admin-User-Insert-Form-Image input[name='foto']",
                 )[0];
                 imageInput.click();
               }}
             >
               {state.foto.length < 1 && (
-                <p className="Admin-Insert-Form-Image-Label">
+                <p className="Admin-User-Insert-Form-Image-Label">
                   Tambah <br /> Foto
                 </p>
               )}
             </div>
           </div>
 
-          <div className="Admin-Insert-Form-Buttons">
+          <div className="Admin-User-Insert-Form-Buttons">
             <button type="button" onClick={insert}>
               Simpan
             </button>
@@ -193,7 +198,7 @@ export default function AdminInsert() {
                 resetForm();
 
                 // Redirect to homepage
-                navigate('/admin');
+                navigate('/admin/user');
               }}
             >
               Batal

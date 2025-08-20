@@ -1,47 +1,60 @@
 import { rootOpenLoading } from '../../../../libs/redux/reducers/root.slice';
+import { removeLoginCredentials } from '../../../../libs/credentials';
 import { logout } from '../../../../libs/redux/reducers/login.slice';
-import './styles/admin.navbar.styles.main.scss';
+import './styles/admin.templates.navbar.styles.main.scss';
 import { useNavigate } from 'react-router-dom';
+import type { CSSProperties } from 'react';
 import { useDispatch } from 'react-redux';
 import { socket } from '../../../../App';
-import {
-  removeLoginCredentials,
-  getLoginCredentials,
-} from '../../../../libs/credentials';
 
-export default function AdminNavbar() {
+interface AdminNavbarProps {
+  globalStyle: any;
+}
+
+export default function AdminNavbar(props: AdminNavbarProps) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  const { globalStyle } = props;
+
+  // Navbar config
+  const { navbarHeight } = globalStyle;
+
+  // Colors
+  const { primaryColor, secondaryColor } = globalStyle;
+
+  const globalButtonStyle: CSSProperties = {
+    backgroundColor: secondaryColor,
+  };
+
   return (
-    <nav className="Admin-Navbar">
+    <nav
+      className="Admin-Navbar"
+      style={{
+        backgroundColor: primaryColor,
+        height: navbarHeight,
+      }}
+    >
       <p className="Admin-Navbar-Title">Permata Komputer</p>
-      <div className="Admin-Navbar-Link-Container">
+      <header className="Admin-Navbar-Link-Container">
         <button
+          style={globalButtonStyle}
           className="Admin-Navbar-Link-Item"
           onClick={() => navigate('/admin')}
         >
           Home
         </button>
         <button
+          style={globalButtonStyle}
           className="Admin-Navbar-Link-Item"
-          onClick={() => navigate('/admin/contact')}
+          onClick={() => navigate('/admin/insert')}
         >
-          Contact
+          Insert
         </button>
         <button
-          className="Admin-Navbar-Link-Item"
-          onClick={() => navigate('/admin/about')}
-        >
-          About
-        </button>
-        <button
+          style={globalButtonStyle}
           className="Admin-Navbar-Link-Item"
           onClick={() => {
-            // Don't forget to emit offline first before delete local storage
-            const { data, role } = getLoginCredentials();
-            socket.emit('offline', { tlp: data.tlp, role });
-
             // Clean credentials (on local-storage)
             removeLoginCredentials();
 
@@ -50,11 +63,14 @@ export default function AdminNavbar() {
 
             // Set login=false and force to open login page
             dispatch(logout());
+
+            // Disconnect from socket server
+            socket.disconnect();
           }}
         >
           Logout
         </button>
-      </div>
+      </header>
     </nav>
   );
 }

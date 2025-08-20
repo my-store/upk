@@ -128,6 +128,10 @@ export default function Login() {
       Log('Re-open loading animation');
       dispatch(rootOpenLoading());
 
+      // Set login data
+      Log('Set is-login & login-role state');
+      dispatch(login(tryLogin.role));
+
       // Close from login-wait state
       Log('Reset login-wait state');
       dispatch(finishWaitLogin());
@@ -135,10 +139,6 @@ export default function Login() {
       // Reset ready state
       Log('Reset login-ready state');
       dispatch(setLoginReady(false));
-
-      // Set login data
-      Log('Set is-login & login-role state');
-      dispatch(login(tryLogin.role));
     } catch (error) {
       // Terminate task
       return failed(`${error}`);
@@ -217,7 +217,7 @@ export default function Login() {
     let landing_url: string = `/${urlRole}`;
     // Redirect\ deep URL is presented
     const redirect: string = findParams('redirect');
-    if (redirect.length > 0) {
+    if (redirect.length > 0 && redirect != '/') {
       // Only if redirect URL (root) is match with the role,
       // If not, keep landing_url as default (redirect to current role)
       const redMatch = new RegExp(urlRole, 'g').test(urlRole);
