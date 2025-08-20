@@ -1,4 +1,4 @@
-import { userSidebarSetUserData } from '../../../../libs/redux/reducers/user.sidebar.slice';
+import { userSidebarSetUserData } from '../../../../libs/redux/reducers/user/user.sidebar.slice';
 import { rootOpenLoading } from '../../../../libs/redux/reducers/root.slice';
 import { logout } from '../../../../libs/redux/reducers/login.slice';
 import type { RootState } from '../../../../libs/redux/store';

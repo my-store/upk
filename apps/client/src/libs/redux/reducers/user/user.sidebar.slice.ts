@@ -1,4 +1,4 @@
-import type { ActionInterface } from '../store';
+import type { ActionInterface } from '../../store';
 import { createSlice } from '@reduxjs/toolkit';
 
 interface DefaultUserSidebarStateInterface {

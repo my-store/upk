@@ -7,7 +7,7 @@ import {
   setUserOffline,
   openUserOnline,
   setUserOnline,
-} from '../../../../libs/redux/reducers/user.online-list.slice';
+} from '../../../../libs/redux/reducers/user/user.online-list.slice';
 import './styles/user.templates.online-list.styles.main.scss';
 import type { RootState } from '../../../../libs/redux/store';
 import { SmallLoading } from '../../../../components/loading';
