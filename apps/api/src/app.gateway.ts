@@ -37,25 +37,12 @@ export class AppGateway
   handleConnection(@ConnectedSocket() client: Socket) {}
 
   // Only for signed-in users (admin, user & kasir)
-  async handleDisconnect(@ConnectedSocket() client: Socket) {
-    // Find for matched user
-    const matchedUser = this.users.find((u) => u.socket == client);
-    if (matchedUser) {
-      // Find index for matched user
-      const matchedUserIndex = this.users.indexOf(matchedUser);
+  handleDisconnect(@ConnectedSocket() client: Socket) {
+    this.offline(client);
+  }
 
-      // Remove matched user
-      this.users.splice(matchedUserIndex, 1);
-
-      // Except videotron
-      if (matchedUser.role != 'Videotron') {
-        // Update online status to false
-        await this.service.logout(matchedUser.tlp, matchedUser.role);
-
-        // Broadcast to all connected devices except me
-        this.broadcast('offline', matchedUser.tlp, client);
-      }
-    }
+  findUser(client: Socket) {
+    return this.users.find((u) => u.socket == client);
   }
 
   broadcast(event: string, data: any, client: Socket) {
@@ -64,27 +51,48 @@ export class AppGateway
   }
 
   // Only for signed-in users (admin, user & kasir)
+  // Triggered by logout button
+  // Videotron and other monitor system will never send this event
+  @SubscribeMessage('offline')
+  async offline(@ConnectedSocket() client: Socket) {
+    // Find for matched user
+    const matchedUser = this.findUser(client);
+    if (matchedUser) {
+      // Find index for matched user
+      const matchedUserIndex = this.users.indexOf(matchedUser);
+
+      // Remove matched user
+      this.users.splice(matchedUserIndex, 1);
+
+      // Update online status to false
+      await this.service.logout(matchedUser.tlp, matchedUser.role);
+
+      // Broadcast to all connected devices except me
+      this.broadcast('offline', matchedUser.tlp, client);
+    }
+  }
+
+  // Only for signed-in users (admin, user & kasir)
+  // Triggered after login
+  // Videotron and other monitor system will never send this event
   @SubscribeMessage('online')
   async online(
     @MessageBody() { tlp, role }: OnlineBody,
     @ConnectedSocket() client: Socket,
   ): Promise<void> {
     // Find for matched user
-    const matchedUser: any = this.users.find((u) => u.socket == client);
+    const matchedUser = this.findUser(client);
 
     // Add new user if not exist
     if (!matchedUser) {
       // Add new user
       this.users.push({ tlp, role, socket: client });
 
-      // Except videotron
-      if (role != 'Videotron') {
-        // Update online status to true
-        await this.service.login(tlp, role);
+      // Update online status to true
+      await this.service.login(tlp, role);
 
-        // Broadcast to all connected devices except me
-        this.broadcast('online', tlp, client);
-      }
+      // Broadcast to all connected devices except me
+      this.broadcast('online', tlp, client);
     }
   }
 
