@@ -31,7 +31,7 @@ export class AuthController {
   constructor(private service: AuthService) {}
 
   // Connection test
-  @Get('connecton-test')
+  @Get('connection-test')
   connectionTest() {
     return { message: "Oke, you're connected!" };
   }
