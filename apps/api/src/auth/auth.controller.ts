@@ -30,6 +30,12 @@ import {
 export class AuthController {
   constructor(private service: AuthService) {}
 
+  // Connection test
+  @Get('connecton-test')
+  connectionTest() {
+    return "Oke, you're connected!";
+  }
+
   @Post()
   signIn(@Body() signInDto: AuthLoginDto) {
     return this.service.signIn(signInDto.tlp, signInDto.pass);
