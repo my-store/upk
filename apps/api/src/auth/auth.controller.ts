@@ -33,7 +33,7 @@ export class AuthController {
   // Connection test
   @Get('connecton-test')
   connectionTest() {
-    return "Oke, you're connected!";
+    return { message: "Oke, you're connected!" };
   }
 
   @Post()
