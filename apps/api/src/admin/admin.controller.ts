@@ -14,6 +14,7 @@ import {
 } from 'src/libs/upload-file-handler';
 import {
   InternalServerErrorException,
+  UnauthorizedException,
   BadRequestException,
   UseInterceptors,
   UploadedFile,
@@ -27,11 +28,27 @@ import {
   Get,
 } from '@nestjs/common';
 
-@UseGuards(AuthGuard)
 @Controller('admin')
 export class AdminController {
   constructor(private readonly service: AdminService) {}
 
+  @Post('register/:dev_code')
+  @UseInterceptors(FileInterceptor('foto'))
+  async register(
+    @Param('dev_code') dev_code: string,
+    @Body() data: CreateAdminDto,
+    @UploadedFile()
+    foto: Express.Multer.File,
+  ): Promise<any> {
+    // Wrong developer key not presented
+    if (!dev_code || dev_code != 'by-owner-permata-komputer') {
+      // Terminate task
+      throw new UnauthorizedException();
+    }
+    return this.create(data, foto);
+  }
+
+  @UseGuards(AuthGuard)
   @Post()
   @UseInterceptors(FileInterceptor('foto'))
   async create(
@@ -93,6 +110,7 @@ export class AdminController {
     return newData;
   }
 
+  @UseGuards(AuthGuard)
   @Get('except-me/:tlp')
   async getAllExceptMe(@Param('tlp') tlp: string): Promise<Admin[]> {
     let data: any;
@@ -112,6 +130,7 @@ export class AdminController {
     return data;
   }
 
+  @UseGuards(AuthGuard)
   @Get()
   async findAll(): Promise<Admin[]> {
     let data: any;
@@ -125,6 +144,7 @@ export class AdminController {
     return data;
   }
 
+  @UseGuards(AuthGuard)
   @Get('where')
   async searchBy(@Body() where: any): Promise<Admin[]> {
     let data: any;
@@ -138,6 +158,7 @@ export class AdminController {
     return data;
   }
 
+  @UseGuards(AuthGuard)
   @Get(':tlp')
   async findOne(@Param('tlp') tlp: string): Promise<Admin> {
     let data: any;
@@ -151,6 +172,7 @@ export class AdminController {
     return data;
   }
 
+  @UseGuards(AuthGuard)
   @Patch(':id')
   @UseInterceptors(FileInterceptor('foto'))
   async update(
@@ -180,6 +202,7 @@ export class AdminController {
     return updatedData;
   }
 
+  @UseGuards(AuthGuard)
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<Admin> {
     let deletedData: any;

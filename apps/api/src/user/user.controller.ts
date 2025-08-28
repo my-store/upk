@@ -24,13 +24,30 @@ import {
   Body,
   Post,
   Get,
+  UnauthorizedException,
 } from '@nestjs/common';
 
-@UseGuards(AuthGuard)
 @Controller('user')
 export class UserController {
   constructor(private readonly service: UserService) {}
 
+  @Post('register/:dev_code')
+  @UseInterceptors(FileInterceptor('foto'))
+  async register(
+    @Param('dev_code') dev_code: string,
+    @Body() data: CreateUserDto,
+    @UploadedFile()
+    foto: Express.Multer.File,
+  ): Promise<any> {
+    // Wrong developer key not presented
+    if (!dev_code || dev_code != 'by-owner-permata-komputer') {
+      // Terminate task
+      throw new UnauthorizedException();
+    }
+    return this.create(data, foto);
+  }
+
+  @UseGuards(AuthGuard)
   @Post()
   @UseInterceptors(FileInterceptor('foto'))
   async create(
@@ -95,6 +112,7 @@ export class UserController {
     return newData;
   }
 
+  @UseGuards(AuthGuard)
   @Get('except-me/:tlp')
   async getAllExceptMe(@Param('tlp') tlp: string): Promise<User[]> {
     let data: any;
@@ -114,6 +132,7 @@ export class UserController {
     return data;
   }
 
+  @UseGuards(AuthGuard)
   @Get()
   async findAll(): Promise<User[]> {
     let data: any;
@@ -127,6 +146,7 @@ export class UserController {
     return data;
   }
 
+  @UseGuards(AuthGuard)
   @Get('where')
   async searchBy(@Body() where: any): Promise<User[]> {
     let data: any;
@@ -140,6 +160,7 @@ export class UserController {
     return data;
   }
 
+  @UseGuards(AuthGuard)
   @Get(':tlp')
   async findOne(@Param('tlp') tlp: string): Promise<User> {
     let data: any;
@@ -153,6 +174,7 @@ export class UserController {
     return data;
   }
 
+  @UseGuards(AuthGuard)
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -170,6 +192,7 @@ export class UserController {
     return updatedData;
   }
 
+  @UseGuards(AuthGuard)
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<User> {
     let deletedData: any;
