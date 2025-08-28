@@ -2,8 +2,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { Prisma } from '../../generated/prisma/client';
-import { Admin } from './entities/admin.entity';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { Admin } from './entities/admin.entity';
 import { AdminService } from './admin.service';
 import {
   GetFileDestBeforeUpload,
