@@ -1,13 +1,12 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { Admin, User, Kasir } from '../../generated/prisma/client';
-import { KasirService } from 'src/kasir/kasir.service';
+import { Admin, User } from '../../generated/prisma/client';
 import { AdminService } from '../admin/admin.service';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
 interface FindAdminOrUser {
-  data: Admin | User | Kasir;
+  data: Admin | User;
   role: string;
 }
 
@@ -15,7 +14,6 @@ interface FindAdminOrUser {
 export class AuthService {
   constructor(
     private readonly admin: AdminService,
-    private readonly kasir: KasirService,
     private readonly user: UserService,
     private readonly jwt: JwtService,
   ) {}
@@ -35,14 +33,6 @@ export class AuthService {
       try {
         data = await this.user.findOne({ where: { tlp } });
         role = 'User';
-      } catch (error) {}
-    }
-
-    // User not found, try find Kasir
-    if (!data) {
-      try {
-        data = await this.kasir.findOne({ where: { tlp } });
-        role = 'Kasir';
       } catch (error) {}
     }
 
@@ -70,7 +60,7 @@ export class AuthService {
     return this.createJwt(data, role);
   }
 
-  async createJwt(person: Admin | User | Kasir, role: string): Promise<any> {
+  async createJwt(person: Admin | User, role: string): Promise<any> {
     const payload = { sub: person.tlp, role };
     const access_token = await this.jwt.signAsync(payload);
     return { access_token, role };

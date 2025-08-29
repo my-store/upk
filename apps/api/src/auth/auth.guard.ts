@@ -1,4 +1,3 @@
-import { jwtConstants } from './auth.constants';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import {
@@ -22,7 +21,7 @@ export class AuthGuard implements CanActivate {
 
     try {
       const payload = await this.jwtService.verifyAsync(token, {
-        secret: jwtConstants.secret,
+        secret: process.env.APP_AUTH_API_KEY,
       });
       // 💡 We're assigning the payload to the request object here
       // so that we can access it in our route handlers

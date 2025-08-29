@@ -1,4 +1,4 @@
-import { Admin, Kasir, User } from 'generated/prisma';
+import { Admin, User } from 'generated/prisma';
 import { Server, Socket } from 'socket.io';
 import { AppService } from './app.service';
 import {
@@ -36,7 +36,7 @@ export class AppGateway
 
   handleConnection(@ConnectedSocket() client: Socket) {}
 
-  // Only for signed-in users (admin, user & kasir)
+  // Only for signed-in users (admin, user)
   handleDisconnect(@ConnectedSocket() client: Socket) {
     this.offline(client);
   }
@@ -50,7 +50,7 @@ export class AppGateway
     client.broadcast.emit(event, data);
   }
 
-  // Only for signed-in users (admin, user & kasir)
+  // Only for signed-in users (admin, user)
   // Triggered by logout button
   // Videotron and other monitor system will never send this event
   @SubscribeMessage('offline')
@@ -72,7 +72,7 @@ export class AppGateway
     }
   }
 
-  // Only for signed-in users (admin, user & kasir)
+  // Only for signed-in users (admin, user)
   // Triggered after login
   // Videotron and other monitor system will never send this event
   @SubscribeMessage('online')
@@ -142,29 +142,5 @@ export class AppGateway
     @ConnectedSocket() client: Socket,
   ): Promise<void> {
     this.broadcast('delete-user', data, client);
-  }
-
-  @SubscribeMessage('new-kasir')
-  async newKasir(
-    @MessageBody() data: Kasir,
-    @ConnectedSocket() client: Socket,
-  ): Promise<void> {
-    this.broadcast('new-kasir', data, client);
-  }
-
-  @SubscribeMessage('update-kasir')
-  async updateKasir(
-    @MessageBody() data: Kasir,
-    @ConnectedSocket() client: Socket,
-  ): Promise<void> {
-    this.broadcast('update-kasir', data, client);
-  }
-
-  @SubscribeMessage('delete-kasir')
-  async deleteKasir(
-    @MessageBody() data: Kasir,
-    @ConnectedSocket() client: Socket,
-  ): Promise<void> {
-    this.broadcast('delete-kasir', data, client);
   }
 }

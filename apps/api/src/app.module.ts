@@ -1,7 +1,6 @@
 import { PersediaanModule } from './persediaan/persediaan.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { AdminModule } from './admin/admin.module';
-import { KasirModule } from './kasir/kasir.module';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
@@ -20,7 +19,6 @@ import { join } from 'path';
     AdminModule,
     UserModule,
     AuthModule,
-    KasirModule,
   ],
 
   providers: [AppGateway, AppService],

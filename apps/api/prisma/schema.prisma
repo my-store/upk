@@ -16,31 +16,15 @@ datasource db {
 }
 
 model Admin {
-  id        Int      @id @default(autoincrement())
-  nama      String
-  tlp       String   @unique
-  password  String
-  foto      String   @default("") // URL foto
-  createdAt DateTime
-  updatedAt DateTime
-
-  online     Boolean @default(false)
-  lastOnline String  @default("")
-
-  // RelatiChild tables
-  User                 User[]
-  Kasir                Kasir[]
-  BankOperasionalBkk   BankOperasionalBkk[]
-  KasOperasional       KasOperasional[]
-  BankBriMd            BankBriMd[]
-  ModalDesa            ModalDesa[]
-  KasModalDesa         KasModalDesa[]
-  RekonsiliasiRekening RekonsiliasiRekening[]
-  KasSpp               KasSpp[]
-  BankSppBrebes        BankSppBrebes[]
-  BankSppJateng        BankSppJateng[]
-  Iventaris            Iventaris[]
-  AsetTetap            AsetTetap[]
+  id         Int      @id @default(autoincrement())
+  nama       String
+  tlp        String   @unique
+  password   String
+  foto       String   @default("") // URL foto
+  online     Boolean  @default(false)
+  lastOnline String   @default("")
+  createdAt  DateTime
+  updatedAt  DateTime
 }
 
 model User {
@@ -57,43 +41,6 @@ model User {
 
   active        Boolean @default(true)
   deactivatedAt String  @default("")
-
-  // Parent table
-  Admin   Admin? @relation(fields: [adminId], references: [id])
-  adminId Int?
-
-  // Child tables
-  BankOperasionalBkk   BankOperasionalBkk[]
-  KasOperasional       KasOperasional[]
-  BankBriMd            BankBriMd[]
-  ModalDesa            ModalDesa[]
-  KasModalDesa         KasModalDesa[]
-  RekonsiliasiRekening RekonsiliasiRekening[]
-  KasSpp               KasSpp[]
-  BankSppBrebes        BankSppBrebes[]
-  BankSppJateng        BankSppJateng[]
-  Iventaris            Iventaris[]
-  AsetTetap            AsetTetap[]
-}
-
-model Kasir {
-  id        Int      @id @default(autoincrement())
-  nama      String
-  tlp       String   @unique
-  password  String
-  foto      String   @default("") // URL foto
-  createdAt DateTime
-  updatedAt DateTime
-
-  online     Boolean @default(false)
-  lastOnline String  @default("")
-
-  active        Boolean @default(true)
-  deactivatedAt String  @default("")
-
-  // Parent table
-  Admin   Admin? @relation(fields: [adminId], references: [id])
-  adminId Int?
 
   // Child tables
   BankOperasionalBkk   BankOperasionalBkk[]
@@ -118,12 +65,8 @@ model BankOperasionalBkk {
   updatedAt      DateTime
 
   // Parent table (who create or change this data)
-  Admin   Admin? @relation(fields: [adminId], references: [id])
-  adminId Int?
-  User    User?  @relation(fields: [userId], references: [id])
-  userId  Int?
-  Kasir   Kasir? @relation(fields: [kasirId], references: [id])
-  kasirId Int?
+  User   User? @relation(fields: [userId], references: [id])
+  userId Int?
 
   // Pemasukan
   pmkSetorRekDo Int
@@ -148,12 +91,8 @@ model KasOperasional {
   updatedAt      DateTime
 
   // Parent table (who create or change this data)
-  Admin   Admin? @relation(fields: [adminId], references: [id])
-  adminId Int?
-  User    User?  @relation(fields: [userId], references: [id])
-  userId  Int?
-  Kasir   Kasir? @relation(fields: [kasirId], references: [id])
-  kasirId Int?
+  User   User? @relation(fields: [userId], references: [id])
+  userId Int?
 
   // Pemasukan
   pmkRekSppUep  Int
@@ -186,12 +125,8 @@ model BankBriMd {
   updatedAt      DateTime
 
   // Parent table (who create or change this data)
-  Admin   Admin? @relation(fields: [adminId], references: [id])
-  adminId Int?
-  User    User?  @relation(fields: [userId], references: [id])
-  userId  Int?
-  Kasir   Kasir? @relation(fields: [kasirId], references: [id])
-  kasirId Int?
+  User   User? @relation(fields: [userId], references: [id])
+  userId Int?
 
   // Pemasukan
   pmkSetorRekBumdesmaUpk Int
@@ -215,12 +150,8 @@ model ModalDesa {
   updatedAt      DateTime
 
   // Parent table (who create or change this data)
-  Admin   Admin? @relation(fields: [adminId], references: [id])
-  adminId Int?
-  User    User?  @relation(fields: [userId], references: [id])
-  userId  Int?
-  Kasir   Kasir? @relation(fields: [kasirId], references: [id])
-  kasirId Int?
+  User   User? @relation(fields: [userId], references: [id])
+  userId Int?
 
   // Penyertaan modal desa
   tipe      String // Tarik atau Setor
@@ -238,12 +169,8 @@ model KasModalDesa {
   updatedAt      DateTime
 
   // Parent table (who create or change this data)
-  Admin   Admin? @relation(fields: [adminId], references: [id])
-  adminId Int?
-  User    User?  @relation(fields: [userId], references: [id])
-  userId  Int?
-  Kasir   Kasir? @relation(fields: [kasirId], references: [id])
-  kasirId Int?
+  User   User? @relation(fields: [userId], references: [id])
+  userId Int?
 
   // Pemasukan
   pmkKas                    Int
@@ -268,12 +195,8 @@ model RekonsiliasiRekening {
   updatedAt  DateTime
 
   // Parent table (who create or change this data)
-  Admin   Admin? @relation(fields: [adminId], references: [id])
-  adminId Int?
-  User    User?  @relation(fields: [userId], references: [id])
-  userId  Int?
-  Kasir   Kasir? @relation(fields: [kasirId], references: [id])
-  kasirId Int?
+  User   User? @relation(fields: [userId], references: [id])
+  userId Int?
 
   // Dibawah ini, beberapa kolom yang perlu dipertanyakan fungsinya
   tanggalSaldo       Int?
@@ -295,12 +218,8 @@ model KasSpp {
   updatedAt      DateTime
 
   // Parent table (who create or change this data)
-  Admin   Admin? @relation(fields: [adminId], references: [id])
-  adminId Int?
-  User    User?  @relation(fields: [userId], references: [id])
-  userId  Int?
-  Kasir   Kasir? @relation(fields: [kasirId], references: [id])
-  kasirId Int?
+  User   User? @relation(fields: [userId], references: [id])
+  userId Int?
 
   // Pemasukan
   pmkPokok       Int
@@ -325,12 +244,8 @@ model BankSppBrebes {
   updatedAt      DateTime
 
   // Parent table (who create or change this data)
-  Admin   Admin? @relation(fields: [adminId], references: [id])
-  adminId Int?
-  User    User?  @relation(fields: [userId], references: [id])
-  userId  Int?
-  Kasir   Kasir? @relation(fields: [kasirId], references: [id])
-  kasirId Int?
+  User   User? @relation(fields: [userId], references: [id])
+  userId Int?
 
   // Pemasukan
   pmkSetorRekSpp Int
@@ -354,12 +269,8 @@ model BankSppJateng {
   updatedAt      DateTime
 
   // Parent table (who create or change this data)
-  Admin   Admin? @relation(fields: [adminId], references: [id])
-  adminId Int?
-  User    User?  @relation(fields: [userId], references: [id])
-  userId  Int?
-  Kasir   Kasir? @relation(fields: [kasirId], references: [id])
-  kasirId Int?
+  User   User? @relation(fields: [userId], references: [id])
+  userId Int?
 
   // Pemasukan
   pmkSetorRekSpp Int
@@ -382,12 +293,8 @@ model Iventaris {
   updatedAt  DateTime
 
   // Parent table (who create or change this data)
-  Admin   Admin? @relation(fields: [adminId], references: [id])
-  adminId Int?
-  User    User?  @relation(fields: [userId], references: [id])
-  userId  Int?
-  Kasir   Kasir? @relation(fields: [kasirId], references: [id])
-  kasirId Int?
+  User   User? @relation(fields: [userId], references: [id])
+  userId Int?
 }
 
 model AsetTetap {
@@ -397,10 +304,6 @@ model AsetTetap {
   updatedAt  DateTime
 
   // Parent table (who create or change this data)
-  Admin   Admin? @relation(fields: [adminId], references: [id])
-  adminId Int?
-  User    User?  @relation(fields: [userId], references: [id])
-  userId  Int?
-  Kasir   Kasir? @relation(fields: [kasirId], references: [id])
-  kasirId Int?
+  User   User? @relation(fields: [userId], references: [id])
+  userId Int?
 }

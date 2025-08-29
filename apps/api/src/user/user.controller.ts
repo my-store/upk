@@ -31,6 +31,8 @@ import {
 export class UserController {
   constructor(private readonly service: UserService) {}
 
+  // Look at .env file
+  // The URL should be '/api/admin/register/APP_REGISTER_DEVCODE'
   @Post('register/:dev_code')
   @UseInterceptors(FileInterceptor('foto'))
   async register(
@@ -40,7 +42,7 @@ export class UserController {
     foto: Express.Multer.File,
   ): Promise<any> {
     // Wrong developer key not presented
-    if (!dev_code || dev_code != 'by-owner-permata-komputer') {
+    if (!dev_code || dev_code != process.env.APP_REGISTER_DEVCODE) {
       // Terminate task
       throw new UnauthorizedException();
     }
@@ -79,9 +81,6 @@ export class UserController {
     try {
       newData = await this.service.create({
         ...data,
-
-        // Parse adminId to integer
-        adminId: parseInt(data.adminId),
 
         // Remove 'public' from image directory
         foto: data.foto.replace('public', ''),

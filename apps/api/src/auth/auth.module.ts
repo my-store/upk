@@ -1,8 +1,6 @@
-import { KasirModule } from 'src/kasir/kasir.module';
 import { AdminModule } from '../admin/admin.module';
 import { AuthController } from './auth.controller';
 import { UserModule } from '../user/user.module';
-import { jwtConstants } from './auth.constants';
 import { AuthService } from './auth.service';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
@@ -11,13 +9,11 @@ import { JwtModule } from '@nestjs/jwt';
   imports: [
     AdminModule,
     UserModule,
-    KasirModule,
     JwtModule.register({
       global: true,
-      secret: jwtConstants.secret,
+      secret: process.env.APP_AUTH_API_KEY,
       signOptions: {
-        // expiresIn: 60000,
-        expiresIn: 60,
+        expiresIn: 60, // 1 Minute
       },
     }),
   ],

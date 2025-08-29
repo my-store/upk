@@ -32,6 +32,8 @@ import {
 export class AdminController {
   constructor(private readonly service: AdminService) {}
 
+  // Look at .env file
+  // The URL should be '/api/admin/register/APP_REGISTER_DEVCODE'
   @Post('register/:dev_code')
   @UseInterceptors(FileInterceptor('foto'))
   async register(
@@ -41,7 +43,7 @@ export class AdminController {
     foto: Express.Multer.File,
   ): Promise<any> {
     // Wrong developer key not presented
-    if (!dev_code || dev_code != 'by-owner-permata-komputer') {
+    if (!dev_code || dev_code != process.env.APP_REGISTER_DEVCODE) {
       // Terminate task
       throw new UnauthorizedException();
     }
