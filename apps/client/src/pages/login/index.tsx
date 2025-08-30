@@ -86,28 +86,14 @@ export default function Login() {
       // Maka response yang diberikan server yaitu:
       // access_token dan role
       // access_token yang akan digunakan pada headers.Authorization
-      // role = Admin, Kasir atau User, ini server yang menentukan saat proses login
+      // role = Admin atau User, ini server yang menentukan saat proses login
       // server akan mencari tahu siapa yang sedang login.
 
-      // Tlp atau password salah
-      if (tryLogin?.statusCode == 401) {
+      // Tlp atau password salah, atau mungkin akun di banned
+      if (tryLogin.message) {
         // Terminate task
-        return failed('Kombinasi data tidak benar');
+        return failed(tryLogin.message);
       }
-
-      // Server tidak memberikan response yang diharapkan seperti dijelaskan diatas
-      // kemungkinan ada error pada server atau konfigurasi.
-      if (!tryLogin.access_token || !tryLogin.role) {
-        // Terminate task and display the error message
-        return failed('Tidak ada akses token dari server');
-      }
-
-      /*
-      | -------------------------------------------------------
-      | LOGIN CREDENTIALS
-      | -------------------------------------------------------
-      | access_token, role and data
-      */
 
       // Get login profile
       const userData = await getUserData(tlp, tryLogin);
@@ -168,7 +154,7 @@ export default function Login() {
 
         // Token still active
         if (profile) {
-          // Terminate process, and force to open landing page (admin | user | kasir)
+          // Terminate process, and force to open landing page (admin | user)
           return redirect(savedCred.role);
         }
 
@@ -187,7 +173,7 @@ export default function Login() {
             // Jadi ambil role terbaru berdasarkan yang diberikan oleh /auth.
             const newToken = getLoginCredentials();
 
-            // Terminate process, and force to open landing page (admin | user | kasir)
+            // Terminate process, and force to open landing page (admin | user)
             return redirect(newToken.role);
           }
         }
@@ -210,7 +196,7 @@ export default function Login() {
   }, []);
 
   // Still not ready (isReady=false), but isLogin=true,
-  // redirect to landing page (admin | user | kasir) and also deep URL/ sub url:
+  // redirect to landing page (admin | user) and also deep URL/ sub url:
   // Example: /admin/sub-url/?and-other-parameters
   if (loginState.isLogin) {
     const urlRole = loginState.loginRole.toLowerCase();

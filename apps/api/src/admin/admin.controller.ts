@@ -3,6 +3,7 @@ import { UpdateAdminDto } from './dto/update-admin.dto';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { Prisma } from '../../generated/prisma/client';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { ParseUrlQuery } from 'src/libs/string';
 import { Admin } from './entities/admin.entity';
 import { AdminService } from './admin.service';
 import {
@@ -23,6 +24,7 @@ import {
   Delete,
   Patch,
   Param,
+  Query,
   Body,
   Post,
   Get,
@@ -113,43 +115,10 @@ export class AdminController {
   }
 
   @UseGuards(AuthGuard)
-  @Get('except-me/:tlp')
-  async getAllExceptMe(@Param('tlp') tlp: string): Promise<Admin[]> {
-    let data: any;
-
-    try {
-      data = await this.service.findAll({
-        where: {
-          tlp: {
-            not: tlp,
-          },
-        },
-      });
-    } catch (e) {
-      throw new InternalServerErrorException(e);
-    }
-
-    return data;
-  }
-
-  @UseGuards(AuthGuard)
   @Get()
-  async findAll(): Promise<Admin[]> {
-    let data: any;
-
-    try {
-      data = await this.service.findAll({});
-    } catch (e) {
-      throw new InternalServerErrorException(e);
-    }
-
-    return data;
-  }
-
-  @UseGuards(AuthGuard)
-  @Get('where')
-  async searchBy(@Body() where: any): Promise<Admin[]> {
-    let data: any;
+  async findAll(@Query() query: any): Promise<Admin[]> {
+    const where: any = ParseUrlQuery(query);
+    let data: Admin[];
 
     try {
       data = await this.service.findAll({ where });

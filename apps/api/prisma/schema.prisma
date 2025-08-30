@@ -39,8 +39,8 @@ model User {
   online     Boolean @default(false)
   lastOnline String  @default("")
 
-  active        Boolean @default(true)
-  deactivatedAt String  @default("")
+  active        Boolean @default(false) // Need to activate by admin
+  deactivatedAt String  @default("") // This is empty until admin block this user
 
   // Child tables
   BankOperasionalBkk   BankOperasionalBkk[]

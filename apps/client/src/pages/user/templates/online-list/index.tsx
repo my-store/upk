@@ -38,7 +38,12 @@ export function UserOnlineListTrigger() {
       headers: { Authorization: `Bearer ${access_token}` },
     });
 
-    const user = await JSONGet(`/api/user/except-me/${data.tlp}`, {
+    /* ------------------- FILTER -------------------
+    | 1. Except me
+    | 2. Active (don't show blocked users)
+    */
+    const args: string = `?tlp={"not": "${data.tlp}"}&active=true`;
+    const user = await JSONGet(`/api/user/${args}`, {
       headers: { Authorization: `Bearer ${access_token}` },
     });
 
@@ -93,8 +98,16 @@ export function UserOnlineList(props: OnlineListProps) {
   }
 
   function newUserHandler(data: any) {
+    console.log(typeof data);
+    console.log(data);
+    return;
     const newData = [...userOnlineState.data, data];
     dispatch(setUserOnlineData(newData));
+  }
+
+  function updateUserHandler(data: any) {
+    console.log(typeof data);
+    console.log(data);
   }
 
   function deleteUserHandler(tlp: string) {
@@ -131,6 +144,7 @@ export function UserOnlineList(props: OnlineListProps) {
     socket.on('online', onlineHandler);
     socket.on('offline', offlineHandler);
     socket.on('new-user', newUserHandler);
+    socket.on('update-user', updateUserHandler);
     socket.on('delete-user', deleteUserHandler);
   }
 

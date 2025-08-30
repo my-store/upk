@@ -45,15 +45,35 @@ export class AuthService {
     // Admin or User or Kasir not found
     if (!data) {
       // Terminate task
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Akun tidak ditemukan!');
     }
 
     // Compare password
-    const passed = bcrypt.compareSync(pass, data.password);
+    const correctPassword = bcrypt.compareSync(pass, data.password);
 
     // Wrong password
-    if (!passed) {
-      throw new UnauthorizedException();
+    if (!correctPassword) {
+      throw new UnauthorizedException('Password salah!');
+    }
+
+    // User rules
+    if (role == 'User') {
+      // Blocked | banned account | not activated yet
+      if (!data.active) {
+        // Blocked or banned
+        if (data.deactivatedAt.length > 0) {
+          // Terminate task
+          throw new UnauthorizedException('Akun anda telah di blokir!');
+        }
+
+        // Not activated (make sure deactivatedAt is empty string)
+        else {
+          // Terminate task
+          throw new UnauthorizedException(
+            'Akun anda belum di aktivasi, silahkan menghubungi admin.',
+          );
+        }
+      }
     }
 
     // Create JWT token

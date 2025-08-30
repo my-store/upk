@@ -33,8 +33,10 @@ export class AdminService {
     updatedAt: true,
   };
 
-  private readonly exceptDevAccount: Prisma.AdminWhereInput = {
+  private readonly getAllFilter: Prisma.AdminWhereInput = {
+    // Filter by phone number
     tlp: {
+      // Developer phone
       not: getDevPhoneFromEnv(),
     },
   };
@@ -87,8 +89,8 @@ export class AdminService {
       where: {
         ...where,
 
-        // Except developer account
-        ...this.exceptDevAccount,
+        // Exception filter
+        ...this.getAllFilter,
       },
       orderBy,
     });

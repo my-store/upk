@@ -1,4 +1,4 @@
-import { FourSquare, LifeLine } from 'react-loading-indicators';
+import { Riple, LifeLine } from 'react-loading-indicators';
 import type { RootState } from '../../libs/redux/store';
 import './styles/components.loading.styles.main.scss';
 import { useEffect, useState } from 'react';
@@ -44,16 +44,11 @@ function setDefaultLoadingConfig(props: LoadingInterface): LoadingInterface {
 }
 
 export function SmallLoading(props: SmallLoadingInterface) {
-  let { color, size, textColor, easing } = setDefaultLoadingConfig(props);
+  let { color, size, textColor } = setDefaultLoadingConfig(props);
   const { width, height } = props;
   return (
     <div className="Small-Loading-Container" style={{ width, height }}>
-      <FourSquare
-        color={color}
-        easing={easing}
-        size={size}
-        textColor={textColor}
-      />
+      <Riple color={color} size={size} textColor={textColor} />
     </div>
   );
 }

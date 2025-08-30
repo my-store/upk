@@ -120,7 +120,7 @@ export default function UserSidebar(props: UserSidebarProps) {
             prepareLogout();
           }}
         >
-          Laporan
+          Keluar
         </button>
       </div>
     </div>

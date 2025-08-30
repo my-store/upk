@@ -3,6 +3,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { ParseUrlQuery } from 'src/libs/string';
 import { UserService } from './user.service';
 import {
   GetFileDestBeforeUpload,
@@ -13,18 +14,19 @@ import {
 } from 'src/libs/upload-file-handler';
 import {
   InternalServerErrorException,
+  UnauthorizedException,
   BadRequestException,
   UseInterceptors,
   UploadedFile,
   Controller,
   UseGuards,
   Delete,
+  Query,
   Patch,
   Param,
   Body,
   Post,
   Get,
-  UnauthorizedException,
 } from '@nestjs/common';
 
 @Controller('user')
@@ -112,43 +114,10 @@ export class UserController {
   }
 
   @UseGuards(AuthGuard)
-  @Get('except-me/:tlp')
-  async getAllExceptMe(@Param('tlp') tlp: string): Promise<User[]> {
-    let data: any;
-
-    try {
-      data = await this.service.findAll({
-        where: {
-          tlp: {
-            not: tlp,
-          },
-        },
-      });
-    } catch (e) {
-      throw new InternalServerErrorException(e);
-    }
-
-    return data;
-  }
-
-  @UseGuards(AuthGuard)
   @Get()
-  async findAll(): Promise<User[]> {
-    let data: any;
-
-    try {
-      data = await this.service.findAll({});
-    } catch (e) {
-      throw new InternalServerErrorException(e);
-    }
-
-    return data;
-  }
-
-  @UseGuards(AuthGuard)
-  @Get('where')
-  async searchBy(@Body() where: any): Promise<User[]> {
-    let data: any;
+  async findAll(@Query() query: any): Promise<User[]> {
+    const where: any = ParseUrlQuery(query);
+    let data: User[];
 
     try {
       data = await this.service.findAll({ where });
