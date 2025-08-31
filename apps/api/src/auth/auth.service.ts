@@ -42,7 +42,7 @@ export class AuthService {
   async signIn(tlp: string, pass: string): Promise<any> {
     const { data, role }: any = await this.findAdminOrUser(tlp);
 
-    // Admin or User or Kasir not found
+    // Admin or User not found
     if (!data) {
       // Terminate task
       throw new UnauthorizedException('Akun tidak ditemukan!');
@@ -86,18 +86,22 @@ export class AuthService {
     return { access_token, role };
   }
 
-  async addDevAccount(data: any): Promise<Admin> {
-    return this.admin.create(data);
-  }
-
   async refresh(tlp: string): Promise<void> {
     // Ambil data user/admin
     const { data, role }: any = await this.findAdminOrUser(tlp);
 
-    // Admin or User or Kasir not found
+    // Admin or User not found
     if (!data) {
       // Terminate task
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Akun tidak ditemukan!');
+    }
+
+    // Block if user is offline (online=false)
+    if (!data.online) {
+      // Terminate task
+      throw new UnauthorizedException(
+        'Akun anda sedang offline, silahkan login terlebih dahulu.',
+      );
     }
 
     // --------------------------------------------------------------
