@@ -1,4 +1,3 @@
-import { PersediaanModule } from './persediaan/persediaan.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { AdminModule } from './admin/admin.module';
 import { UserModule } from './user/user.module';
@@ -15,7 +14,6 @@ import { join } from 'path';
       rootPath: join(__dirname, '../../', 'client', 'dist'),
     }),
     ConfigModule.forRoot({ isGlobal: true }),
-    PersediaanModule,
     AdminModule,
     UserModule,
     AuthModule,
