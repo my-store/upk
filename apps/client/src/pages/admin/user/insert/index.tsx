@@ -18,6 +18,14 @@ import {
 } from '../../../../libs/credentials';
 import $ from 'jquery';
 
+interface DefaultInsertConfigInterface {
+  active: boolean;
+}
+
+const DefaultInsertConfig: DefaultInsertConfigInterface = {
+  active: true,
+};
+
 export default function UserInsert() {
   const state = useSelector((state: RootState) => state.admin_user_insert);
   const dispatch = useDispatch();
@@ -25,6 +33,10 @@ export default function UserInsert() {
 
   const errorAudioURL: string = `${serverUrl}/static/sounds/error.mp3`;
   const errorSound: HTMLAudioElement = new Audio(errorAudioURL);
+
+  function getInsertConfig() {
+    //
+  }
 
   function failed(msg: string): void {
     // Play error sound
@@ -148,6 +160,15 @@ export default function UserInsert() {
               name="password"
               defaultValue={state.password}
               onChange={(e) => dispatch(userInsertSetPassword(e.target.value))}
+            />
+          </div>
+
+          <div className="Admin-User-Insert-Form-Group">
+            <label>Otomatis Aktivasi</label>
+            <input
+              type="checkbox"
+              name="active"
+              defaultChecked={state.active}
             />
           </div>
 

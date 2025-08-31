@@ -6,6 +6,7 @@ interface DefaultUserInsertInterface {
   tlp: string;
   password: string;
   foto: string;
+  active: boolean;
 
   insertWait: boolean;
 }
@@ -15,6 +16,7 @@ const DefaultUserInsertState: DefaultUserInsertInterface = {
   tlp: '',
   password: '',
   foto: '',
+  active: false,
 
   insertWait: false,
 };
@@ -47,6 +49,13 @@ function SetFotoHandler(
   state.foto = action.payload;
 }
 
+function SetActiveHandler(
+  state: DefaultUserInsertInterface,
+  action: ActionInterface,
+) {
+  state.active = action.payload;
+}
+
 function SetWaitHandler(
   state: DefaultUserInsertInterface,
   action: ActionInterface,
@@ -62,6 +71,7 @@ const UserInsertSlice = createSlice({
     userInsertSetTlp: SetTlpHandler,
     userInsertSetPassword: SetPasswordHandler,
     userInsertSetFoto: SetFotoHandler,
+    userInsertSetActive: SetActiveHandler,
     userInsertSetWait: SetWaitHandler,
   },
 });
@@ -71,6 +81,7 @@ export const {
   userInsertSetTlp,
   userInsertSetPassword,
   userInsertSetFoto,
+  userInsertSetActive,
   userInsertSetWait,
 } = UserInsertSlice.actions;
 export default UserInsertSlice.reducer;

@@ -96,14 +96,6 @@ export class AuthService {
       throw new UnauthorizedException('Akun tidak ditemukan!');
     }
 
-    // Block if user is offline (online=false)
-    if (!data.online) {
-      // Terminate task
-      throw new UnauthorizedException(
-        'Akun anda sedang offline, silahkan login terlebih dahulu.',
-      );
-    }
-
     // --------------------------------------------------------------
     // SOON
     // --------------------------------------------------------------
