@@ -3,6 +3,7 @@ import AdminUserListReducer from './reducers/admin/admin.user.list.slice';
 import AdminUserInsertReducer from './reducers/admin/user.insert.slice';
 import AdminSidebarReducer from './reducers/admin/admin.sidebar.slice';
 import AdminInsertReducer from './reducers/admin/admin.insert.slice';
+import AdminConfigReducer from './reducers/admin/admin.config.slice';
 import UserSidebarReducer from './reducers/user/user.sidebar.slice';
 import AdminListReducer from './reducers/admin/admin.list.slice';
 import AlertReducer from './reducers/components.alert.slice';
@@ -26,6 +27,7 @@ export const store = configureStore({
     user_onlineList: UserOnlineListReducer,
     user_sidebar: UserSidebarReducer,
 
+    admin_config: AdminConfigReducer,
     admin_insert: AdminInsertReducer,
     admin_list: AdminListReducer,
     admin_user_list: AdminUserListReducer,

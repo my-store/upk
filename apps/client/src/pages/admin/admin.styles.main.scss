@@ -1,6 +1,13 @@
 .App {
-  main {
-    .Admin {
-    }
+  .Admin {
+    // Menyesuaikan tinggi navbar
+    padding-top: 5vh;
+
+    // Menyesuaikan lebar sidebar
+    padding-left: 17vw;
+
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
   }
 }

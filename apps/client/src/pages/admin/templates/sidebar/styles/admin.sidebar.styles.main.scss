@@ -7,6 +7,11 @@
       top: 0px;
       z-index: 1;
       background-color: white;
+      width: 17vw;
+      border-right: 1px solid #c1c1c1;
+
+      // Menyesuaikan tinggi navbar
+      padding-top: 5vh;
 
       // Important | used to fix vertical scroll on sidebar buttons
       display: flex;
@@ -19,26 +24,34 @@
         align-items: center;
         flex-direction: column;
         padding-bottom: 5px;
-        border-bottom: 1px solid #c1c1c1;
 
         .Admin-Sidebar-Profile-Photo-Container {
           display: flex;
           align-items: center;
           justify-content: center;
+          width: 17vw;
+          height: 17vw;
 
           .Admin-Sidebar-Profile-Photo-Image {
+            width: 15vw;
+            height: 15vw;
             border-radius: 10px;
-            background: #f1f1f1;
-            // background-image: url('https://r2.erweima.ai/imgcompressed/img/compressed_e732d27392855249bb07cfd89ccf9353.webp');
+            background-color: #f1f1f1;
             background-position: center;
             background-repeat: no-repeat;
             background-size: cover;
+            border: 2px solid #f1f1f1;
+
+            box-shadow: 1px 1px 3px 2px rgba(0, 0, 0, 0.53);
+            -webkit-box-shadow: 1px 1px 3px 2px rgba(0, 0, 0, 0.53);
+            -moz-box-shadow: 1px 1px 3px 2px rgba(0, 0, 0, 0.53);
           }
         }
 
         .Admin-Sidebar-Profile-Info-Container {
           width: 100%;
-          text-align: center;
+          padding-left: 1vw;
+          padding-right: 1vw;
 
           .Admin-Sidebar-Profile-Info-Name {
             font-size: 16px;

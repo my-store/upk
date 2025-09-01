@@ -1,0 +1,112 @@
+.Admin {
+  .Admin-Config {
+    height: 100vh;
+    width: 25vw;
+    border-left: 1px solid #c1c1c1;
+    background-color: #fff;
+
+    position: fixed;
+    top: 0px;
+    z-index: 3;
+
+    animation-duration: 0.4s;
+    animation-iteration-count: inherit;
+
+    right: -30vw;
+    visibility: hidden;
+    opacity: 0;
+
+    .Admin-Config-Header {
+      width: 100%;
+      height: 30px;
+      display: flex;
+      justify-content: space-between;
+
+      .Admin-Config-Header-Text {
+        padding-bottom: 5px;
+        margin-bottom: 5px;
+        width: 100%;
+        padding-left: 7px;
+        height: 30px;
+        line-height: 30px;
+        background-color: rgb(206, 240, 255);
+      }
+
+      .Admin-Config-Header-Close-Button {
+        background-color: rgb(255, 192, 192);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 30px;
+        width: 30px;
+
+        &:hover {
+          opacity: 0.7;
+        }
+      }
+    }
+
+    .Admin-Config-Body {
+      width: 100%;
+      padding: 5px;
+
+      .Admin-Config-Body-Item {
+        border-radius: 5px;
+        padding: 5px;
+        background-color: rgb(206, 240, 255);
+
+        .Admin-Config-Body-Item-Title {
+          font-size: 15px;
+          font-weight: bold;
+        }
+
+        .Admin-Config-Body-Item-Subdata {
+          padding-left: 10px;
+
+          .Admin-Config-Body-Item-Subdata-Label {
+            font-size: 15px;
+          }
+
+          .Admin-Config-Body-Item-Subdata-Value {
+            padding-left: 10px;
+            display: flex;
+            justify-content: space-between;
+
+            .Admin-Config-Body-Item-Subdata-Value-Label {
+              font-size: 15px;
+            }
+
+            input[type='checkbox'] {
+              height: 15px;
+              width: 15px;
+              cursor: pointer;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .Admin-Config-Active {
+    visibility: visible;
+    opacity: 1;
+    right: 0vw;
+
+    animation-name: Admin-Config-Anim;
+  }
+
+  @keyframes Admin-Config-Anim {
+    0% {
+      right: -30vw;
+    }
+
+    60% {
+      right: 1vw;
+    }
+
+    100% {
+      right: 0vw;
+    }
+  }
+}

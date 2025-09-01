@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import type { CSSProperties } from 'react';
 import { useDispatch } from 'react-redux';
 import { socket } from '../../../../App';
+import { setAdminConfigOpened } from '../../../../libs/redux/reducers/admin/admin.config.slice';
 
 interface AdminNavbarProps {
   globalStyle: any;
@@ -16,9 +17,6 @@ export default function AdminNavbar(props: AdminNavbarProps) {
   const dispatch = useDispatch();
 
   const { globalStyle } = props;
-
-  // Navbar config
-  const { navbarHeight } = globalStyle;
 
   // Colors
   const { primaryColor, secondaryColor } = globalStyle;
@@ -32,7 +30,6 @@ export default function AdminNavbar(props: AdminNavbarProps) {
       className="Admin-Navbar"
       style={{
         backgroundColor: primaryColor,
-        height: navbarHeight,
       }}
     >
       <p className="Admin-Navbar-Title">Permata Komputer</p>
@@ -50,6 +47,13 @@ export default function AdminNavbar(props: AdminNavbarProps) {
           onClick={() => navigate('/admin/insert')}
         >
           Insert
+        </button>
+        <button
+          style={globalButtonStyle}
+          className="Admin-Navbar-Link-Item"
+          onClick={() => dispatch(setAdminConfigOpened(true))}
+        >
+          Pengaturan
         </button>
         <button
           style={globalButtonStyle}

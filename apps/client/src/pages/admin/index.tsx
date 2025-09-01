@@ -11,17 +11,14 @@ import AdminUserList from './user';
 import AdminInsert from './insert';
 import './admin.styles.main.scss';
 import { useEffect } from 'react';
+import AdminConfig from './config';
 
 export interface AdminGlobalStyleInterface {
-  navbarHeight: number;
-  sidebarWidth: number;
   primaryColor: string;
   secondaryColor: string;
 }
 
 const globalStyle: AdminGlobalStyleInterface = {
-  navbarHeight: 35,
-  sidebarWidth: 220,
   primaryColor: 'rgb(50, 101, 167)',
   secondaryColor: 'rgb(33, 76, 131)',
 };
@@ -101,14 +98,9 @@ function AdminGlobalTemplates({ children, socketConnect }: any) {
   if (rootState.isLoading) return null;
 
   return (
-    <div
-      className="Admin"
-      style={{
-        paddingTop: globalStyle.navbarHeight,
-        paddingLeft: globalStyle.sidebarWidth,
-      }}
-    >
+    <div className="Admin">
       <AdminNavbar globalStyle={globalStyle} />
+      <AdminConfig globalStyle={globalStyle} />
       <AdminSidebar globalStyle={globalStyle} />
       {children}
     </div>

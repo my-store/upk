@@ -2,28 +2,34 @@
   .Admin-User-Insert {
     width: 100%;
     height: 100vh;
-    background-color: rgb(203, 243, 221);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
 
     .Admin-User-Insert-Box {
       background-color: white;
-      border-radius: 10px;
-      width: 50vw;
+      width: 100%;
+      padding: 5px;
+
+      .Admin-User-Insert-Header {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        .Admin-User-Insert-Header-Text {
+          font-weight: bold;
+          font-size: 25px;
+        }
+      }
 
       form {
         width: 100%;
 
-        .Admin-User-Insert-Form-Group {
+        .Admin-User-Insert-Form-Input {
           width: 100%;
-          padding: 0px 5px 0px 5px;
 
           label {
             display: inline-block;
-            font-size: 14px;
-            line-height: 14px;
+            font-size: 15px;
+            line-height: 15px;
             margin-bottom: 3px;
             position: relative;
             transform: translateY(13px) translateX(8px);
@@ -36,20 +42,35 @@
           input {
             width: 100%;
             outline: none;
+            height: 38px;
+            border-radius: 7px;
+            border: 1px solid grey;
+            padding: 7px 10px 0px 10px;
+          }
+        }
 
-            // Global input
-            &:not([type='checkbox'], input[type='radio'], input[type='file']) {
-              height: 38px;
-              border-radius: 7px;
-              border: 1px solid grey;
-              padding: 7px 10px 0px 10px;
-            }
+        .Admin-User-Insert-Form-Checkbox {
+          display: flex;
+          padding: 10px 0px 10px 0px;
+
+          label {
+            font-size: 15px;
+            line-height: 15px;
+            margin-right: 10px;
+          }
+
+          input {
+            height: 14px;
+            width: 14px;
+            cursor: pointer;
           }
         }
 
         .Admin-User-Insert-Form-Image {
           width: 100%;
-          padding: 7px 5px 0px 5px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
 
           // Hidden
           input {
@@ -66,8 +87,8 @@
             background-position: center;
             border-radius: 7px;
             cursor: pointer;
-            height: 80px;
-            width: 80px;
+            height: 20vh;
+            width: 20vh;
             background-color: lightgrey;
 
             display: flex;
@@ -79,9 +100,10 @@
             }
 
             .Admin-User-Insert-Form-Image-Label {
-              font-size: 13px;
-              line-height: 14px;
+              font-size: 14px;
+              line-height: 15px;
               text-align: center;
+              color: #555555;
             }
           }
         }
@@ -89,20 +111,20 @@
         .Admin-User-Insert-Form-Buttons {
           width: 100%;
           padding: 5px;
-          margin-top: 5px;
+          margin-top: 20px;
           display: flex;
-          justify-content: flex-end;
+          justify-content: center;
 
           button {
             outline: none;
-            font-size: 14px;
+            font-size: 15px;
             cursor: pointer;
             border: 1px solid grey;
             padding: 3px 20px 3px 20px;
             border-radius: 7px;
 
             &:not(:nth-child(1)) {
-              margin-left: 5px;
+              margin-left: 10px;
             }
           }
         }

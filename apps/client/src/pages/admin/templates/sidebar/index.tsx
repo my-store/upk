@@ -27,12 +27,6 @@ export default function AdminSidebar(props: AdminSidebarProps) {
   // Colors
   const { primaryColor } = globalStyle;
 
-  // Navbar config
-  const { navbarHeight } = globalStyle;
-
-  // Sidebar config
-  const { sidebarWidth } = globalStyle;
-
   function load() {
     const { data } = getLoginCredentials();
     dispatch(adminSidebarSetAdminData(data));
@@ -60,26 +54,12 @@ export default function AdminSidebar(props: AdminSidebarProps) {
   if (!sidebarState.adminData) return null;
 
   return (
-    <div
-      className="Admin-Sidebar"
-      style={{
-        paddingTop: `${navbarHeight}px`,
-        width: `${sidebarWidth}px`,
-      }}
-    >
+    <div className="Admin-Sidebar">
       <div className="Admin-Sidebar-Profile-Container">
-        <div
-          className="Admin-Sidebar-Profile-Photo-Container"
-          style={{
-            width: `${sidebarWidth}px`,
-            height: `${sidebarWidth}px`,
-          }}
-        >
+        <div className="Admin-Sidebar-Profile-Photo-Container">
           <div
             className="Admin-Sidebar-Profile-Photo-Image"
             style={{
-              width: `${sidebarWidth - 15}px`,
-              height: `${sidebarWidth - 15}px`,
               backgroundImage: `url(${serverUrl + '/static' + sidebarState.adminData.foto})`,
             }}
           ></div>
@@ -111,7 +91,7 @@ export default function AdminSidebar(props: AdminSidebarProps) {
           style={{ color: primaryColor }}
           onClick={() => navigate('/admin/user')}
         >
-          Staf
+          User
         </button>
         <button
           style={{ color: primaryColor }}

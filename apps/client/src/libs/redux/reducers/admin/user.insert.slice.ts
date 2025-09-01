@@ -16,7 +16,7 @@ const DefaultUserInsertState: DefaultUserInsertInterface = {
   tlp: '',
   password: '',
   foto: '',
-  active: false,
+  active: true,
 
   insertWait: false,
 };

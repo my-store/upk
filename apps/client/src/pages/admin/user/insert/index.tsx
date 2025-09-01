@@ -1,3 +1,4 @@
+import { adminConfigSetUserInsertAutoActivate } from '../../../../libs/redux/reducers/admin/admin.config.slice';
 import { openAlert } from '../../../../libs/redux/reducers/components.alert.slice';
 import {
   userInsertSetPassword,
@@ -18,25 +19,18 @@ import {
 } from '../../../../libs/credentials';
 import $ from 'jquery';
 
-interface DefaultInsertConfigInterface {
-  active: boolean;
-}
-
-const DefaultInsertConfig: DefaultInsertConfigInterface = {
-  active: true,
-};
-
 export default function UserInsert() {
-  const state = useSelector((state: RootState) => state.admin_user_insert);
+  const insertState = useSelector(
+    (state: RootState) => state.admin_user_insert,
+  );
+  const configState = useSelector(
+    (state: RootState) => state.admin_config.user.insert,
+  );
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const errorAudioURL: string = `${serverUrl}/static/sounds/error.mp3`;
   const errorSound: HTMLAudioElement = new Audio(errorAudioURL);
-
-  function getInsertConfig() {
-    //
-  }
 
   function failed(msg: string): void {
     // Play error sound
@@ -57,12 +51,12 @@ export default function UserInsert() {
 
   async function insert() {
     // Block multiple input request | Wait until finish!
-    if (state.insertWait) return;
+    if (insertState.insertWait) return;
 
     // Force user to wait until insert logic is finished
     dispatch(userInsertSetWait(true));
 
-    const { nama, tlp, password, foto } = state;
+    const { nama, tlp, password, foto } = insertState;
 
     if (nama.length < 1) return failed('Silahkan isi nama user');
     if (tlp.length < 1) return failed('Silahkan isi no tlp user');
@@ -132,43 +126,51 @@ export default function UserInsert() {
   return (
     <div className="Admin-User-Insert">
       <div className="Admin-User-Insert-Box">
+        <div className="Admin-User-Insert-Header">
+          <p className="Admin-User-Insert-Header-Text">Tambahkan User Baru</p>
+        </div>
+
         <form onSubmit={(e) => e.preventDefault()} method="POST">
-          <div className="Admin-User-Insert-Form-Group">
+          <div className="Admin-User-Insert-Form-Input">
             <label>Nama</label>
             <input
               type="text"
               name="nama"
-              defaultValue={state.nama}
+              defaultValue={insertState.nama}
               onChange={(e) => dispatch(userInsertSetNama(e.target.value))}
             />
           </div>
 
-          <div className="Admin-User-Insert-Form-Group">
+          <div className="Admin-User-Insert-Form-Input">
             <label>Tlp</label>
             <input
               type="text"
               name="tlp"
-              defaultValue={state.tlp}
+              defaultValue={insertState.tlp}
               onChange={(e) => dispatch(userInsertSetTlp(e.target.value))}
             />
           </div>
 
-          <div className="Admin-User-Insert-Form-Group">
+          <div className="Admin-User-Insert-Form-Input">
             <label>Katasandi</label>
             <input
               type="text"
               name="password"
-              defaultValue={state.password}
+              defaultValue={insertState.password}
               onChange={(e) => dispatch(userInsertSetPassword(e.target.value))}
             />
           </div>
 
-          <div className="Admin-User-Insert-Form-Group">
-            <label>Otomatis Aktivasi</label>
+          <div className="Admin-User-Insert-Form-Checkbox">
+            <label>Aktivasi</label>
             <input
               type="checkbox"
               name="active"
-              defaultChecked={state.active}
+              defaultChecked={configState.autoActivate}
+              checked={configState.autoActivate}
+              onChange={({ target: { checked } }) =>
+                dispatch(adminConfigSetUserInsertAutoActivate(checked))
+              }
             />
           </div>
 
@@ -191,7 +193,7 @@ export default function UserInsert() {
               className="Admin-User-Insert-Form-Image-Preview"
               style={{
                 backgroundImage:
-                  state.foto.length > 0 ? `url(${state.foto})` : '',
+                  insertState.foto.length > 0 ? `url(${insertState.foto})` : '',
               }}
               onClick={() => {
                 const imageInput = $(
@@ -200,9 +202,9 @@ export default function UserInsert() {
                 imageInput.click();
               }}
             >
-              {state.foto.length < 1 && (
+              {insertState.foto.length < 1 && (
                 <p className="Admin-User-Insert-Form-Image-Label">
-                  Tambah <br /> Foto
+                  Pilih <br /> Foto
                 </p>
               )}
             </div>
