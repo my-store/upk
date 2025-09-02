@@ -9,10 +9,12 @@
     color: white;
     padding: 0px 7px 0px 7px;
     display: flex;
+    align-items: center;
     justify-content: space-between;
 
     .Admin-Navbar-Title {
-      font-size: 25px;
+      font-size: 18px;
+      font-weight: 400;
       width: 100%;
     }
 
@@ -20,15 +22,28 @@
       display: flex;
       align-items: center;
 
-      button {
-        line-height: 23px;
+      .Admin-Navbar-Link-Sepataror {
+        width: 15px;
         text-align: center;
+        font-size: 14px;
+        line-height: 14px;
+      }
+
+      button {
+        color: #fff;
+        // padding: 0px 5px 0px 5px;
         cursor: pointer;
-        color: white;
-        border: 1px solid white;
-        width: 100px;
-        &:not(:nth-child(1)) {
-          margin-left: 5px;
+        font-weight: 300;
+        font-size: 14px;
+
+        // Remove default styles
+        background: none;
+        outline: none;
+        border: none;
+        white-space: nowrap;
+
+        &:hover {
+          color: #8dfbff;
         }
       }
     }

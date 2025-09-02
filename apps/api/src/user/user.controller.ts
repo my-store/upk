@@ -116,11 +116,11 @@ export class UserController {
   @UseGuards(AuthGuard)
   @Get()
   async findAll(@Query() query: any): Promise<User[]> {
-    const where: any = ParseUrlQuery(query);
+    const args: any = ParseUrlQuery(query);
     let data: User[];
 
     try {
-      data = await this.service.findAll({ where });
+      data = await this.service.findAll(args);
     } catch (e) {
       throw new InternalServerErrorException(e);
     }

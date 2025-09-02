@@ -75,24 +75,40 @@ export default function AdminSidebar(props: AdminSidebarProps) {
       </div>
 
       <div className="Admin-Sidebar-Button-Container">
+        {/* Homepage */}
         <button
           style={{ color: primaryColor }}
           onClick={() => navigate('/admin')}
         >
           Beranda
         </button>
+
+        {/* Admin */}
         <button
           style={{ color: primaryColor }}
           onClick={() => navigate('/admin/admin')}
         >
           Admin
         </button>
+
+        {/* User */}
         <button
           style={{ color: primaryColor }}
           onClick={() => navigate('/admin/user')}
         >
           User
         </button>
+
+        {/* Sample Buttons */}
+        <button style={{ color: primaryColor }}>Inventaris</button>
+        <button style={{ color: primaryColor }}>Bank Ops BKK</button>
+        <button style={{ color: primaryColor }}>Bank Jateng</button>
+        <button style={{ color: primaryColor }}>Modal</button>
+        <button style={{ color: primaryColor }}>Operasional</button>
+        <button style={{ color: primaryColor }}>Laba Rugi</button>
+        <button style={{ color: primaryColor }}>Micro Finance</button>
+
+        {/* Logout */}
         <button
           style={{ color: primaryColor }}
           onClick={(e) => {

@@ -1,0 +1,49 @@
+.Admin {
+  .Admin-Config {
+    .Admin-Config-Body {
+      /* ---------- USER CONFIG STYLES ---------- */
+      .Admin-User-Config {
+        width: 100%;
+
+        .Admin-User-Config-Title {
+          font-size: 15px;
+          line-height: 20px;
+          padding-left: 7px;
+          background-color: #afafaf;
+        }
+
+        .Admin-User-Config-Data {
+          width: 100%;
+          background-color: #dbdbdb;
+          padding: 1px 7px 1px 7px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+
+          .Admin-User-Config-Data-Label {
+            font-size: 14px;
+            width: 100%;
+          }
+
+          input {
+            width: 30%;
+
+            // Global styles
+            padding: 0px 5px 0px 5px;
+
+            // Number type styles
+            &:is([type='number']) {
+              padding: 0px 0px 0px 2px;
+            }
+          }
+
+          input[type='checkbox'] {
+            height: 15px;
+            width: 15px;
+            cursor: pointer;
+          }
+        }
+      }
+    }
+  }
+}
