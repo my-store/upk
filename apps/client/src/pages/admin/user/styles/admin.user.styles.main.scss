@@ -1,46 +1,68 @@
 .Admin {
   .User-List {
     width: 100%;
+    height: 100vh;
+    overflow-y: scroll;
+
+    // Special styles
+    padding-top: 5vh; // Mengikuti tinggi header
+    padding-bottom: 50px; // Hanya spacer supaya user paling bawah terlihat full
 
     .User-List-Header {
-      width: 100%;
+      height: 5vh;
+      width: 83vw;
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0px 7px 0px 7px;
-      border-bottom: 1px solid #c1c1c1;
+      background-color: #fff;
+
+      // Special styles
+      position: fixed;
+      left: 17vw; // Mengikuti lebar sidebar
+      z-index: 2; // Mengikuti navbar
+      top: 5vh; // Mengikuti tinggi navbar
 
       .User-List-Header-Text {
         font-weight: 400;
-        font-size: 20px;
+        font-size: 16px;
       }
 
       .User-List-Header-Button-Container {
         display: flex;
         align-items: center;
 
-        button {
+        .Admin-Navbar-Link-Sepataror {
+          width: 10px;
+          text-align: center;
           font-size: 14px;
+          line-height: 14px;
+        }
+
+        button {
           font-weight: 300;
+          font-size: 14px;
           cursor: pointer;
 
           // Remove default styles
-          border: none;
-          outline: none;
           background: none;
+          outline: none;
+          border: none;
+          white-space: nowrap;
         }
       }
     }
 
     .User-List-Body {
       width: 100%;
+      padding: 0px 7px 0px 7px;
 
       .User-List-Item-Container {
         width: 100%;
         display: flex;
 
         &:not(:nth-last-child(1)) {
-          border-bottom: 5px solid rgb(223, 223, 223);
+          border-bottom: 5px solid rgb(240, 240, 240);
         }
 
         .User-List-Item-Image-Container {
@@ -65,9 +87,20 @@
 
           .User-List-Item-Info-Nama {
             font-weight: 400;
+            font-size: 15px;
           }
 
           .User-List-Item-Info-Tlp {
+            font-weight: 300;
+          }
+
+          .User-List-Item-Info-Active {
+            color: green;
+            font-weight: 300;
+          }
+
+          .User-List-Item-Info-NonActive {
+            color: red;
             font-weight: 300;
           }
         }

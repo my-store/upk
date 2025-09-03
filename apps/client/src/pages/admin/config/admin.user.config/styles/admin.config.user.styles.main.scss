@@ -5,17 +5,10 @@
       .Admin-User-Config {
         width: 100%;
 
-        .Admin-User-Config-Title {
-          font-size: 15px;
-          line-height: 20px;
-          padding-left: 7px;
-          background-color: #afafaf;
-        }
-
         .Admin-User-Config-Data {
           width: 100%;
           background-color: #dbdbdb;
-          padding: 1px 7px 1px 7px;
+          padding: 2px 7px 2px 7px;
           display: flex;
           align-items: center;
           justify-content: space-between;
@@ -23,10 +16,13 @@
           .Admin-User-Config-Data-Label {
             font-size: 14px;
             width: 100%;
+            font-weight: 300;
           }
 
           input {
             width: 30%;
+            font-size: 14px;
+            font-weight: 300;
 
             // Global styles
             padding: 0px 5px 0px 5px;

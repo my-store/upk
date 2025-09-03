@@ -1,7 +1,29 @@
 import type { ActionInterface } from '../../store';
 import { createSlice } from '@reduxjs/toolkit';
 
+export interface UserListDisplayInterface {
+  label: string;
+  value: any;
+}
+
+export const UserListDisplayItems: UserListDisplayInterface[] = [
+  {
+    label: 'Semua',
+    value: 1,
+  },
+  {
+    label: 'Aktif',
+    value: 2,
+  },
+  {
+    label: 'Nonaktif',
+    value: 3,
+  },
+];
+
 interface UserListConfigInterface {
+  ready: boolean;
+  display: number;
   shortByNew: boolean;
   maxDisplay: number;
   maxLoadMore: number;
@@ -26,6 +48,8 @@ export const DefaultAdminConfigState: DefaultAdminConfigInterface = {
   opened: false,
   user: {
     list: {
+      ready: false,
+      display: 1, // Default = Tampilkan semua user
       shortByNew: true,
       maxDisplay: 50,
       maxLoadMore: 15,
@@ -42,6 +66,20 @@ function SetAdminConfigOpenedHandler(
   action: ActionInterface,
 ) {
   state.opened = action.payload;
+}
+
+function SetUserListReadyHandler(
+  state: DefaultAdminConfigInterface,
+  action: ActionInterface,
+) {
+  state.user.list.ready = action.payload;
+}
+
+function SetUserListDisplayHandler(
+  state: DefaultAdminConfigInterface,
+  action: ActionInterface,
+) {
+  state.user.list.display = action.payload;
 }
 
 function SetUserListShortByNewHandler(
@@ -89,6 +127,8 @@ const AdminConfigSlice = createSlice({
     setUserListMaxLoadMore: SetUserListMaxLoadMoreHandler,
     setUserListMaxSearchDisplay: SetUserListMaxSearchDisplayHandler,
     setUserListShortByNew: SetUserListShortByNewHandler,
+    setUserListDisplay: SetUserListDisplayHandler,
+    setUserListReady: SetUserListReadyHandler,
   },
 });
 
@@ -99,5 +139,7 @@ export const {
   setUserListMaxLoadMore,
   setUserListMaxSearchDisplay,
   setUserListShortByNew,
+  setUserListDisplay,
+  setUserListReady,
 } = AdminConfigSlice.actions;
 export default AdminConfigSlice.reducer;

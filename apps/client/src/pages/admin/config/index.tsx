@@ -4,7 +4,7 @@ import {
 } from '../../../libs/redux/reducers/admin/admin.config.slice';
 import type { RootState } from '../../../libs/redux/store';
 import { useDispatch, useSelector } from 'react-redux';
-import AdminUserConfig from './admin.config.user';
+import AdminUserConfig from './admin.user.config';
 import './styles/admin.config.styles.main.scss';
 import { MdClose } from 'react-icons/md';
 
@@ -69,7 +69,6 @@ export default function AdminConfig(props: AdminConfigProps) {
         </div>
       </div>
       <div className="Admin-Config-Body">
-        {/* User Config */}
         <AdminUserConfig />
       </div>
     </div>

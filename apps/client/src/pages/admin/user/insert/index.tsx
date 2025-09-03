@@ -9,7 +9,7 @@ import {
 } from '../../../../libs/redux/reducers/admin/user.insert.slice';
 import type { RootState } from '../../../../libs/redux/store';
 import { useDispatch, useSelector } from 'react-redux';
-import { JSONPost } from '../../../../libs/requests';
+import { FormPost } from '../../../../libs/requests';
 import './styles/admin.user.insert.styles.main.scss';
 import { useNavigate } from 'react-router-dom';
 import { serverUrl } from '../../../../App';
@@ -77,14 +77,22 @@ export default function UserInsert() {
     const { access_token, data } = getLoginCredentials();
 
     // Insert data
-    const insertReq = await JSONPost('/api/user', {
+    const req = await FormPost('/api/user', {
       headers: { Authorization: `Bearer ${access_token}` },
       body: formData,
     });
 
-    // Token expired
-    if (insertReq.message) {
-      // Refresh login token
+    // Error occured
+    if (req.message) {
+      // Some server error response, 401 is Unauthorized
+      if (req.statusCode != 401) {
+        // Close from insert-wait state
+        dispatch(userInsertSetWait(false));
+        // Terminate task and display error message
+        return failed(req.message);
+      }
+
+      // Token expired | Unauthorized | Refresh login token
       await refreshToken(data.tlp);
 
       // Close from insert-wait state
@@ -93,8 +101,6 @@ export default function UserInsert() {
       // Re-call this function
       return insert();
     }
-
-    // Insert success
 
     // Show success message
     dispatch(
@@ -107,6 +113,9 @@ export default function UserInsert() {
 
     // Reset form
     resetForm();
+
+    // Redirect to homepage
+    navigate('/admin/user');
   }
 
   function resetForm() {
@@ -118,10 +127,6 @@ export default function UserInsert() {
     // Close from insert-wait state
     dispatch(userInsertSetWait(false));
   }
-
-  // function validate() {}
-
-  // function listenChange() {}
 
   return (
     <div className="Admin-User-Insert">
@@ -166,7 +171,6 @@ export default function UserInsert() {
             <input
               type="checkbox"
               name="active"
-              defaultChecked={configState.autoActivate}
               checked={configState.autoActivate}
               onChange={({ target: { checked } }) =>
                 dispatch(adminConfigSetUserInsertAutoActivate(checked))
