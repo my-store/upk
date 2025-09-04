@@ -196,7 +196,7 @@ export class AdminController {
     return data;
   }
 
-  // @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard)
   @Patch(':tlp')
   @UseInterceptors(FileInterceptor('foto'))
   async update(
