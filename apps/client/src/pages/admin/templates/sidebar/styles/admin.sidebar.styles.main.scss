@@ -45,6 +45,25 @@
             -webkit-box-shadow: 1px 1px 3px 2px rgba(0, 0, 0, 0.53);
             -moz-box-shadow: 1px 1px 3px 2px rgba(0, 0, 0, 0.53);
           }
+
+          .Admin-Sidebar-Profile-Photo-Image-Edit-Button {
+            position: absolute;
+            z-index: 1;
+            transform: translateY(5vw) translateX(5vw);
+            cursor: pointer;
+            padding: 5px;
+            height: 30px;
+            width: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #fff;
+            border-radius: 15px;
+
+            &:hover {
+              opacity: 0.8;
+            }
+          }
         }
 
         .Admin-Sidebar-Profile-Info-Container {

@@ -3,33 +3,63 @@ import { createSlice } from '@reduxjs/toolkit';
 
 interface DefaultStateInterface {
   data: any[];
-  activateWait: boolean;
+  updateDataWait: boolean;
 }
 
 const DefaultState: DefaultStateInterface = {
   data: [],
-  activateWait: false,
+  updateDataWait: false,
 };
 
-function SetActivateWaitHandler(
+function UpdateDataWaitHandler(
   state: DefaultStateInterface,
   action: ActionInterface,
 ) {
-  state.activateWait = action.payload;
+  state.updateDataWait = action.payload;
 }
 
-function SetUpdatedDataHandler(
+function PushNewDataHandler(
+  state: DefaultStateInterface,
+  action: ActionInterface,
+) {
+  // Index = 0, place a new user at the begining
+  if (action.payload.index == 0) {
+    state.data.unshift(action.payload.data);
+  }
+
+  // Index -1, place a new user at the end
+  else {
+    state.data.push(action.payload.data);
+  }
+}
+
+function UpdateDataHandler(
   state: DefaultStateInterface,
   action: ActionInterface,
 ) {
   // Find, make sure the item is inside data (matched)
-  const matched = state.data.find((nd: any) => nd.id == action.payload.id);
+  const matched = state.data.find((nd: any) => nd.tlp == action.payload.tlp);
   // If so
   if (matched) {
     // Get the index of matched item
     const matchedIndex = state.data.indexOf(matched);
-    // Replace matched data with new data
-    state.data[matchedIndex] = action.payload;
+    // Replace matched data with new data (merge)
+    state.data[matchedIndex] = { ...matched, ...action.payload };
+  }
+}
+
+function DeleteDataHandler(
+  state: DefaultStateInterface,
+  action: ActionInterface,
+) {
+  // Find, make sure the item is inside data (matched)
+  const matched = state.data.find((nd: any) => nd.tlp == action.payload.tlp);
+  // If so
+  if (matched) {
+    // Get the index of matched item
+    const matchedIndex = state.data.indexOf(matched);
+    // Delete mathed user from data
+    state.data.splice(matchedIndex, 1);
   }
 }
 
@@ -45,14 +75,18 @@ const AdminUserListSlice = createSlice({
   initialState: DefaultState,
   reducers: {
     adminUserListSetListData: SetListDataHandler,
-    adminUserSetActivateWait: SetActivateWaitHandler,
-    adminUserSetUpdatedData: SetUpdatedDataHandler,
+    adminUserSetUpdateDataWait: UpdateDataWaitHandler,
+    adminUserUpdateData: UpdateDataHandler,
+    adminUserPushNewData: PushNewDataHandler,
+    adminUserDeleteData: DeleteDataHandler,
   },
 });
 
 export const {
   adminUserListSetListData,
-  adminUserSetActivateWait,
-  adminUserSetUpdatedData,
+  adminUserSetUpdateDataWait,
+  adminUserUpdateData,
+  adminUserPushNewData,
+  adminUserDeleteData,
 } = AdminUserListSlice.actions;
 export default AdminUserListSlice.reducer;

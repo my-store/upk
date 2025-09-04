@@ -7,6 +7,7 @@ import type { AdminGlobalStyleInterface } from '../..';
 import { serverUrl, socket } from '../../../../App';
 import './styles/admin.sidebar.styles.main.scss';
 import { useNavigate } from 'react-router-dom';
+import { CiEdit } from 'react-icons/ci';
 import {
   removeLoginCredentials,
   getLoginCredentials,
@@ -46,6 +47,9 @@ export default function AdminSidebar(props: AdminSidebarProps) {
     socket.disconnect();
   }
 
+  // SOON ...
+  function openUpdateFoto() {}
+
   useEffect(() => {
     load();
   }, []);
@@ -63,6 +67,12 @@ export default function AdminSidebar(props: AdminSidebarProps) {
               backgroundImage: `url(${serverUrl + '/static' + sidebarState.adminData.foto})`,
             }}
           ></div>
+          <div
+            className="Admin-Sidebar-Profile-Photo-Image-Edit-Button"
+            onClick={openUpdateFoto}
+          >
+            <CiEdit size={25} />
+          </div>
         </div>
         <div className="Admin-Sidebar-Profile-Info-Container">
           <p className="Admin-Sidebar-Profile-Info-Name">

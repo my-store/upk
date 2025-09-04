@@ -1,5 +1,6 @@
 import { User, Prisma } from '../../generated/prisma/client';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { AdminService } from 'src/admin/admin.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -31,7 +32,10 @@ import {
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly service: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly adminService: AdminService,
+  ) {}
 
   // Look at .env file
   // The URL should be '/api/admin/register/APP_REGISTER_DEVCODE'
@@ -61,27 +65,70 @@ export class UserController {
   ): Promise<any> {
     let newData: any;
 
-    // Jika user tidak mengunggah foto
+    /* ------------------ USER TIDAK MENGUNGGAH FOTO ------------------ */
     if (!foto) {
       throw new BadRequestException('Wajib mengunggah foto!');
-    }
-
-    // User mengunggah foto namun formatnya salah,
-    // atau mungkin user salah input file.
-    else {
+    } else {
+      /* --------------------- PENGECEKAN FORMAT DAN UKURAN FOTO ---------------------
+      |  Format foto yang dibolehkan adalah: JPG, JPEG dan PNG
+      |  Lihat selengkapnya di: libs/upload-file-handler.ts/ProfileImageValidator()
+      */
       const { status, message } = ProfileImageValidator(foto);
       if (!status) {
         throw new BadRequestException(message);
       }
     }
 
-    // Set image name
+    /* ------------------ PENGECEKAN NO. TLP ------------------
+    |  Pastikan No. Tlp belum ada yang menggunakan, jika ada
+    |  user ataupun admin yang menggunakan No. Tlp tersebut,
+    |  permintaan input data ditolak.
+    */
+    let alreadyUsed: boolean = false;
+    try {
+      // Pengecekan apakah ada user yang menggunakan No. Tlp tersebut
+      const usrExist: any = await this.userService.findOne({
+        where: { tlp: data.tlp },
+      });
+      if (usrExist) {
+        // No. Tlp telah digunakan oleh seorang user
+        alreadyUsed = true;
+      }
+    } catch {}
+
+    // Tidak ada user yang menggunakan No. Tlp tersebut
+    if (!alreadyUsed) {
+      // Pengecekan apakah ada admin yang menggunakan No. Tlp tersebut
+      try {
+        const admExist: any = await this.adminService.findOne({
+          where: { tlp: data.tlp },
+        });
+        if (admExist) {
+          // No. Tlp telah digunakan oleh seorang admin
+          alreadyUsed = true;
+        }
+      } catch {}
+    }
+
+    // Jika ada user atau admin yang telah menggunakan No. Tlp tersebut
+    if (alreadyUsed) {
+      // Terminate task | Tolak permintaan input
+      throw new BadRequestException(`No. Tlp ${data.tlp} telah digunakan!`);
+    }
+
+    /* ------------------ NAMA FOTO ------------------
+    |  Nama foto berasal dari No. Tlp user
+    */
     const img_path = `${upload_img_dir}/user/profile`;
     const img_name = data.tlp;
     data.foto = GetFileDestBeforeUpload(foto, img_path, img_name);
 
+    /* ------------------ MENYIMPAN DATA ------------------
+    |  Simpan data dulu, foto hanya URL saja, upload file
+    |  setelah berhasil menyimpan data.
+    */
     try {
-      newData = await this.service.create({
+      newData = await this.userService.create({
         ...data,
 
         // Remove 'public' from image directory
@@ -102,14 +149,21 @@ export class UserController {
       throw new InternalServerErrorException(e);
     }
 
-    // Upload image
+    /* ------------------ MENGUNGGAH FOTO ------------------
+    |  Setelah data berhasil disimpan, proses selanjutnya
+    |  adalah mengunggah foto.
+    */
     try {
       UploadFile(foto, data.foto);
     } catch (e) {
       throw new InternalServerErrorException(e);
     }
 
-    // Data yang berhasil di input ke database
+    /* ------------------ SELESAI ------------------
+    |  Setelah data berhasil disimpan, dan foto
+    |  berhasil di unggah, proses selanjutnya adalah
+    |  mengembalikan data baru tersebut kepada client.
+    */
     return newData;
   }
 
@@ -120,7 +174,7 @@ export class UserController {
     let data: User[];
 
     try {
-      data = await this.service.findAll(args);
+      data = await this.userService.findAll(args);
     } catch (e) {
       throw new InternalServerErrorException(e);
     }
@@ -130,11 +184,11 @@ export class UserController {
 
   @UseGuards(AuthGuard)
   @Get(':tlp')
-  async findOne(@Param('tlp') tlp: string): Promise<User> {
-    let data: any;
+  async findOne(@Param('tlp') tlp: string): Promise<User | null> {
+    let data: User | null;
 
     try {
-      data = await this.service.findOne({ where: { tlp } });
+      data = await this.userService.findOne({ where: { tlp } });
     } catch (e) {
       throw new InternalServerErrorException(e);
     }
@@ -143,33 +197,136 @@ export class UserController {
   }
 
   @UseGuards(AuthGuard)
-  @Patch(':id')
+  @Patch(':tlp')
   async update(
-    @Param('id') id: string,
+    @Param('tlp') tlp: string,
     @Body() data: UpdateUserDto,
+    @UploadedFile() foto?: Express.Multer.File,
   ): Promise<User> {
-    let updatedData: any;
+    let updatedData: User;
 
+    /* ------------------ MENGAMBIL DATA LAMA ------------------ */
+    let oldData: User | null;
     try {
-      updatedData = await this.service.update({ id: +id }, data);
+      oldData = await this.userService.findOne({ where: { tlp } });
+    } catch {
+      throw new BadRequestException('User tidak ditemukan!');
+    }
+
+    /* ------------------ USER MERUBAH NO. TLP ------------------
+    |  Pastikan No. Tlp belum ada yang menggunakan, jika ada
+    |  user ataupun admin yang menggunakan No. Tlp tersebut,
+    |  permintaan input data ditolak.
+    */
+    if (data.tlp) {
+      // Pastikan No. Tlp baru tidak sama dengan No. Tlp lama
+      if (data.tlp != oldData?.tlp) {
+        let alreadyUsed: boolean = false;
+        try {
+          // Pengecekan apakah ada user yang menggunakan No. Tlp tersebut
+          const usrExist: any = await this.userService.findOne({
+            where: { tlp: data.tlp },
+          });
+          if (usrExist) {
+            // No. Tlp telah digunakan oleh seorang user
+            alreadyUsed = true;
+          }
+        } catch {}
+
+        // Tidak ada user yang menggunakan No. Tlp tersebut
+        if (!alreadyUsed) {
+          // Pengecekan apakah ada admin yang menggunakan No. Tlp tersebut
+          try {
+            const admExist: any = await this.adminService.findOne({
+              where: { tlp: data.tlp },
+            });
+            if (admExist) {
+              // No. Tlp telah digunakan oleh seorang admin
+              alreadyUsed = true;
+            }
+          } catch {}
+        }
+
+        // Jika ada user atau admin yang telah menggunakan No. Tlp tersebut
+        if (alreadyUsed) {
+          // Terminate task | Tolak permintaan input
+          throw new BadRequestException(`No. Tlp ${data.tlp} telah digunakan!`);
+        }
+      }
+    }
+
+    /* ------------------ USER MERUBAH FOTO ------------------ */
+    if (foto) {
+      /* --------------------- PENGECEKAN FORMAT DAN UKURAN FOTO ---------------------
+      |  Format foto yang dibolehkan adalah: JPG, JPEG dan PNG
+      |  Lihat selengkapnya di: libs/upload-file-handler.ts/ProfileImageValidator()
+      */
+      const { status, message } = ProfileImageValidator(foto);
+      if (!status) {
+        throw new BadRequestException(message);
+      }
+
+      /* ------------------ NAMA FOTO ------------------
+      |  Nama foto berasal dari No. Tlp user
+      */
+      const img_path = `${upload_img_dir}/user/profile`;
+      const img_name = tlp;
+      data.foto = GetFileDestBeforeUpload(foto, img_path, img_name);
+    }
+
+    /* ------------------ MENYIMPAN DATA ------------------ */
+    try {
+      updatedData = await this.userService.update(
+        { tlp },
+        {
+          ...data,
+
+          // Remove 'public' from image directory
+          foto: data.foto?.replace('public', ''),
+        },
+      );
     } catch (e) {
       throw new InternalServerErrorException(e);
     }
 
-    // Data yang berhasil di ubah di database
+    /* ------------------ MENGUNGGAH FOTO (JIKA ADA) ------------------
+    |  Setelah data berhasil disimpan, proses selanjutnya
+    |  adalah mengunggah foto.
+    */
+    if (foto) {
+      // Hapus foto lama dulu
+      try {
+        DeleteFile('public' + oldData?.foto);
+      } catch (e) {
+        throw new InternalServerErrorException(e);
+      }
+
+      // Mengunggah foto baru
+      try {
+        UploadFile(foto, 'public' + updatedData.foto);
+      } catch (e) {
+        throw new InternalServerErrorException(e);
+      }
+    }
+
+    /* --------------------- SELESAI ---------------------
+    |  Setelah data berhasil disimpan, dan foto (jika ada)
+    |  berhasil di unggah, proses selanjutnya adalah
+    |  mengembalikan data baru tersebut kepada client.
+    */
     return updatedData;
   }
 
   @UseGuards(AuthGuard)
-  @Delete(':id')
-  async remove(@Param('id') id: string): Promise<User> {
-    let deletedData: any;
+  @Delete(':tlp')
+  async remove(@Param('tlp') tlp: string): Promise<User> {
+    let deletedData: User;
 
     // Delete data from database
     try {
-      deletedData = await this.service.remove({ id: +id });
+      deletedData = await this.userService.remove({ tlp });
     } catch (e) {
-      throw new BadRequestException(e);
+      throw new InternalServerErrorException(e);
     }
 
     // Delete image profile too

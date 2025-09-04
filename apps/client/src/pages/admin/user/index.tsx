@@ -1,7 +1,9 @@
 import {
+  adminUserSetUpdateDataWait,
   adminUserListSetListData,
-  adminUserSetActivateWait,
-  adminUserSetUpdatedData,
+  adminUserPushNewData,
+  adminUserUpdateData,
+  adminUserDeleteData,
 } from '../../../libs/redux/reducers/admin/admin.user.list.slice';
 import { setAdminConfigOpened } from '../../../libs/redux/reducers/admin/admin.config.slice';
 import { openAlert } from '../../../libs/redux/reducers/components.alert.slice';
@@ -9,9 +11,9 @@ import { getLoginCredentials, refreshToken } from '../../../libs/credentials';
 import { JSONGet, JSONPatch } from '../../../libs/requests';
 import type { RootState } from '../../../libs/redux/store';
 import { useSelector, useDispatch } from 'react-redux';
+import { serverUrl, socket } from '../../../App';
 import { useNavigate } from 'react-router-dom';
 import './styles/admin.user.styles.main.scss';
-import { serverUrl } from '../../../App';
 import { useEffect } from 'react';
 
 export default function AdminUserList() {
@@ -20,7 +22,43 @@ export default function AdminUserList() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  function onlineHandler(tlp: string) {
+    // The update-data-handler is supported merge, so
+    // No need other data, just online status to be updated
+    dispatch(adminUserUpdateData({ tlp, online: true }));
+  }
+
+  function offlineHandler(tlp: string) {
+    // The update-data-handler is supported merge, so
+    // No need other data, just online status to be updated
+    dispatch(adminUserUpdateData({ tlp, online: false }));
+  }
+
+  function newUserHandler(data: any) {
+    const index = config.list.shortByNew ? 0 : -1;
+    dispatch(adminUserPushNewData({ index, data }));
+  }
+
+  function updateUserHandler(data: any) {
+    dispatch(adminUserUpdateData(data));
+  }
+
+  function deleteUserHandler(tlp: string) {
+    dispatch(adminUserDeleteData({ tlp }));
+  }
+
+  function socketListener() {
+    socket.on('online', onlineHandler);
+    socket.on('offline', offlineHandler);
+    socket.on('new-user', newUserHandler);
+    socket.on('update-user', updateUserHandler);
+    socket.on('delete-user', deleteUserHandler);
+  }
+
   async function load() {
+    // Listen incoming socket events
+    socketListener();
+
     const { access_token, data } = getLoginCredentials();
     const { maxDisplay } = config.list;
 
@@ -72,34 +110,37 @@ export default function AdminUserList() {
     dispatch(adminUserListSetListData(req));
   }
 
-  // Block or activate user (toggle true & false)
-  async function activate(id: number, active: boolean) {
-    // Activation is waiting
-    if (state.activateWait) {
+  /* ----------------- UPDATE DATA HANDLER -----------------
+  |  1. Activate or Deactivate
+  |  2. Online or Offline
+  */
+  async function update(tlp: string, newData: any) {
+    // Update is waiting
+    if (state.updateDataWait) {
       // Terminate task
       return;
     }
 
-    // Set activation wait state
-    dispatch(adminUserSetActivateWait(true));
+    // Set update wait state
+    dispatch(adminUserSetUpdateDataWait(true));
 
     // Mengambil login credentials pada local-storage
     const { access_token, data } = getLoginCredentials();
 
-    const url: string = `/api/user/${id}`;
+    const url: string = `/api/user/${tlp}`;
 
     // Kirim request ke server (PATCH)
     const req = await JSONPatch(url, {
       headers: { Authorization: `Bearer ${access_token}` },
-      body: JSON.stringify({ active }),
+      body: JSON.stringify(newData),
     });
 
     // Error occured
     if (req.message) {
       // Some server error response, 401 is Unauthorized
       if (req.statusCode != 401) {
-        // Reset activation wait state
-        dispatch(adminUserSetActivateWait(false));
+        // Reset update wait state
+        dispatch(adminUserSetUpdateDataWait(false));
 
         // Terminate task and display error message
         return dispatch(
@@ -115,14 +156,14 @@ export default function AdminUserList() {
       await refreshToken(data.tlp);
 
       // Re-call this function
-      return activate(id, active);
+      return update(tlp, newData);
     }
 
     // Update data (single, only this data)
-    dispatch(adminUserSetUpdatedData(req));
+    dispatch(adminUserUpdateData(req));
 
-    // Reset activation wait state
-    dispatch(adminUserSetActivateWait(false));
+    // Reset update wait state
+    dispatch(adminUserSetUpdateDataWait(false));
   }
 
   useEffect(
@@ -167,10 +208,21 @@ export default function AdminUserList() {
               ></div>
             </div>
             <div className="User-List-Item-Info-Container">
-              <p className="User-List-Item-Info-Nama">{d.nama}</p>
+              {/* Nama */}
+              <p className="User-List-Item-Info-Nama">
+                <span
+                  className="User-List-Item-Info-Online"
+                  style={{ backgroundColor: d.online ? 'green' : 'red' }}
+                ></span>
+                {d.nama}
+              </p>
+
+              {/* No. Tlp */}
               <p className="User-List-Item-Info-Tlp">{d.tlp}</p>
+
+              {/* Active status */}
               <button
-                onClick={() => activate(d.id, d.active ? false : true)}
+                onClick={() => update(d.tlp, { active: !d.active })}
                 className="User-List-Item-Info-Active-Button"
                 style={{
                   backgroundColor: d.active ? '#c7255bff' : '#25c789ff',

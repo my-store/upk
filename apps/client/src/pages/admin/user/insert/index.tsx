@@ -102,6 +102,9 @@ export default function UserInsert() {
       return insert();
     }
 
+    // SOON ...
+    // If autoactivate is turned-on (true), broadcast for new-user socket event
+
     // Show success message
     dispatch(
       openAlert({
