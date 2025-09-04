@@ -1,4 +1,8 @@
-import { adminUserListSetListData } from '../../../libs/redux/reducers/admin/admin.user.list.slice';
+import {
+  adminUserListSetListData,
+  adminUserSetActivateWait,
+  adminUserSetUpdatedData,
+} from '../../../libs/redux/reducers/admin/admin.user.list.slice';
 import { setAdminConfigOpened } from '../../../libs/redux/reducers/admin/admin.config.slice';
 import { openAlert } from '../../../libs/redux/reducers/components.alert.slice';
 import { getLoginCredentials, refreshToken } from '../../../libs/credentials';
@@ -68,7 +72,17 @@ export default function AdminUserList() {
     dispatch(adminUserListSetListData(req));
   }
 
-  async function activate(id: number) {
+  // Block or activate user (toggle true & false)
+  async function activate(id: number, active: boolean) {
+    // Activation is waiting
+    if (state.activateWait) {
+      // Terminate task
+      return;
+    }
+
+    // Set activation wait state
+    dispatch(adminUserSetActivateWait(true));
+
     // Mengambil login credentials pada local-storage
     const { access_token, data } = getLoginCredentials();
 
@@ -77,13 +91,16 @@ export default function AdminUserList() {
     // Kirim request ke server (PATCH)
     const req = await JSONPatch(url, {
       headers: { Authorization: `Bearer ${access_token}` },
-      body: JSON.stringify({ active: true }),
+      body: JSON.stringify({ active }),
     });
 
     // Error occured
     if (req.message) {
       // Some server error response, 401 is Unauthorized
       if (req.statusCode != 401) {
+        // Reset activation wait state
+        dispatch(adminUserSetActivateWait(false));
+
         // Terminate task and display error message
         return dispatch(
           openAlert({
@@ -98,11 +115,14 @@ export default function AdminUserList() {
       await refreshToken(data.tlp);
 
       // Re-call this function
-      return activate(id);
+      return activate(id, active);
     }
 
-    // Reload data
-    load();
+    // Update data (single, only this data)
+    dispatch(adminUserSetUpdatedData(req));
+
+    // Reset activation wait state
+    dispatch(adminUserSetActivateWait(false));
   }
 
   useEffect(
@@ -137,11 +157,7 @@ export default function AdminUserList() {
 
       <div className="User-List-Body">
         {state.data.map((d, dx) => (
-          <div
-            key={d.id + dx.toString()}
-            className="User-List-Item-Container"
-            // onClick={() => activate(d.id)}
-          >
+          <div key={d.id + dx.toString()} className="User-List-Item-Container">
             <div className="User-List-Item-Image-Container">
               <div
                 style={{
@@ -153,11 +169,15 @@ export default function AdminUserList() {
             <div className="User-List-Item-Info-Container">
               <p className="User-List-Item-Info-Nama">{d.nama}</p>
               <p className="User-List-Item-Info-Tlp">{d.tlp}</p>
-              <p
-                className={`User-List-Item-Info-${d.active ? 'Active' : 'NonActive'}`}
+              <button
+                onClick={() => activate(d.id, d.active ? false : true)}
+                className="User-List-Item-Info-Active-Button"
+                style={{
+                  backgroundColor: d.active ? '#c7255bff' : '#25c789ff',
+                }}
               >
-                {d.active ? 'Aktif' : 'Belum diaktivasi'}
-              </p>
+                {d.active ? 'Blokir' : 'Aktivasi'}
+              </button>
             </div>
           </div>
         ))}
