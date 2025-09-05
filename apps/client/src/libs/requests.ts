@@ -69,3 +69,21 @@ export async function FormPost(
   const res = await req.json();
   return res;
 }
+
+export async function FormPatch(
+  url: string,
+  options?: RequestInit,
+): Promise<any> {
+  const req = await fetch(url, {
+    method: 'PATCH',
+    headers: {
+      // In react (browser app) is not need headers, but on other app like react-native is needed.
+
+      // Add new or override default headers (by user)
+      ...options?.headers,
+    },
+    body: options?.body,
+  });
+  const res = await req.json();
+  return res;
+}

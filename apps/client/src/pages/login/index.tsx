@@ -12,10 +12,10 @@ import {
 
 import {
   finishWaitLogin,
-  login,
   setLoginReady,
   updateBgUrl,
   waitLogin,
+  login,
 } from '../../libs/redux/reducers/login.slice';
 import { Log, Warn } from '../../libs/console';
 import { findParams } from '../../libs/url';

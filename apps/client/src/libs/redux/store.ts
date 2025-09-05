@@ -1,8 +1,8 @@
-import AdminTemplatesSidebarReducer from './reducers/admin/admin.templates.sidebar.slice';
+import AdminTemplatesSidebarReducer from './reducers/admin/admin.templates.sidebar.update-profile.slice';
 import UserOnlineListReducer from './reducers/user/user.online-list.slice';
 import AdminUserListReducer from './reducers/admin/admin.user.list.slice';
 import AdminUserInsertReducer from './reducers/admin/user.insert.slice';
-import AdminSidebarReducer from './reducers/admin/admin.sidebar.slice';
+import AdminSidebarReducer from './reducers/admin/admin.templates.sidebar';
 import AdminInsertReducer from './reducers/admin/admin.insert.slice';
 import AdminConfigReducer from './reducers/admin/admin.config.slice';
 import UserSidebarReducer from './reducers/user/user.sidebar.slice';
@@ -33,8 +33,8 @@ export const store = configureStore({
     admin_list: AdminListReducer,
     admin_user_list: AdminUserListReducer,
     admin_user_insert: AdminUserInsertReducer,
-    admin_sidebar: AdminSidebarReducer,
-    admin_templates_sidebar: AdminTemplatesSidebarReducer,
+    admin_templates_sidebar: AdminSidebarReducer,
+    admin_templates_sidebar_update_profile: AdminTemplatesSidebarReducer,
   },
 });
 

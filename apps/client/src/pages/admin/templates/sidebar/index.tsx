@@ -1,8 +1,11 @@
 import {
-  adminTemplatesSidebarBoxOpen,
-  adminTemplatesSidebarOpen,
-} from '../../../../libs/redux/reducers/admin/admin.templates.sidebar.slice';
-import { adminSidebarSetAdminData } from '../../../../libs/redux/reducers/admin/admin.sidebar.slice';
+  adminTemplatesSidebarUpdateProfileBoxOpen,
+  adminTemplatesSidebarUpdateProfileFoto,
+  adminTemplatesSidebarUpdateProfileNama,
+  adminTemplatesSidebarUpdateProfileOpen,
+  adminTemplatesSidebarUpdateProfileTlp,
+} from '../../../../libs/redux/reducers/admin/admin.templates.sidebar.update-profile.slice';
+import { adminSidebarSetAdminData } from '../../../../libs/redux/reducers/admin/admin.templates.sidebar';
 import { rootOpenLoading } from '../../../../libs/redux/reducers/root.slice';
 import { logout } from '../../../../libs/redux/reducers/login.slice';
 import type { RootState } from '../../../../libs/redux/store';
@@ -25,7 +28,9 @@ interface AdminSidebarProps {
 export default function AdminSidebar(props: AdminSidebarProps) {
   const { globalStyle } = props;
 
-  const sidebarState = useSelector((state: RootState) => state.admin_sidebar);
+  const sidebarState = useSelector(
+    (state: RootState) => state.admin_templates_sidebar,
+  );
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -53,10 +58,23 @@ export default function AdminSidebar(props: AdminSidebarProps) {
 
   function openUpdateFoto() {
     // Open update profile container
-    dispatch(adminTemplatesSidebarOpen(true));
+    dispatch(adminTemplatesSidebarUpdateProfileOpen(true));
 
     // Open update profile box after 0.25 second (sesuai animation-duration dari container)
-    setTimeout(() => dispatch(adminTemplatesSidebarBoxOpen(true)), 250);
+    setTimeout(() => {
+      // Open update box
+      dispatch(adminTemplatesSidebarUpdateProfileBoxOpen(true));
+
+      // Set update-profile state (get from adminData in sidebar slice)
+      const { adminData } = sidebarState;
+      dispatch(adminTemplatesSidebarUpdateProfileNama(adminData.nama)); // Nama
+      dispatch(adminTemplatesSidebarUpdateProfileTlp(adminData.tlp)); // Tlp
+      dispatch(
+        adminTemplatesSidebarUpdateProfileFoto(
+          serverUrl + '/static' + sidebarState.adminData.foto,
+        ),
+      );
+    }, 250);
   }
 
   useEffect(() => {
@@ -128,13 +146,7 @@ export default function AdminSidebar(props: AdminSidebarProps) {
         <button style={{ color: primaryColor }}>Micro Finance</button>
 
         {/* Logout */}
-        <button
-          style={{ color: primaryColor }}
-          onClick={(e) => {
-            e.preventDefault();
-            prepareLogout();
-          }}
-        >
+        <button style={{ color: primaryColor }} onClick={prepareLogout}>
           Logout
         </button>
       </div>

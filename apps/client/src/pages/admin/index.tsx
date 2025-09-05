@@ -1,5 +1,5 @@
-import AdminSidebarUpdateProfile from './templates/sidebar/update-profile/admin.templates.sidebar.update-profile.image';
 import { adminListSetListData } from '../../libs/redux/reducers/admin/admin.list.slice';
+import AdminSidebarUpdateProfile from './templates/sidebar/update-profile';
 import { getLoginCredentials, refreshToken } from '../../libs/credentials';
 import { rootRemoveLoading } from '../../libs/redux/reducers/root.slice';
 import type { RootState } from '../../libs/redux/store';
@@ -105,7 +105,7 @@ function AdminGlobalTemplates({ children, socketConnect }: any) {
 
       {/* Sidebar */}
       <AdminSidebar globalStyle={globalStyle} />
-      <AdminSidebarUpdateProfile />
+      <AdminSidebarUpdateProfile globalStyle={globalStyle} />
 
       {/* Page */}
       {children}

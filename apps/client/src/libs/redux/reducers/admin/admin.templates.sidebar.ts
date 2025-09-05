@@ -17,7 +17,7 @@ function SetAdminData(
 }
 
 const AdminSidebarSlice = createSlice({
-  name: 'admin.sidebar',
+  name: 'admin.templates.sidebar',
   initialState: DefaultAdminSidebarState,
   reducers: {
     adminSidebarSetAdminData: SetAdminData,

@@ -1,11 +1,12 @@
 import { Admin, Prisma } from '../../generated/prisma/client';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { UpdateAdminDto } from './dto/update-admin.dto';
+import { UpdateAdminDto, UpdateAdminPasswordDto } from './dto/update-admin.dto';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UserService } from 'src/user/user.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { ParseUrlQuery } from 'src/libs/string';
 import { AdminService } from './admin.service';
+import * as bcrypt from 'bcrypt';
 import {
   GetFileDestBeforeUpload,
   ProfileImageValidator,
@@ -29,6 +30,7 @@ import {
   Post,
   Get,
 } from '@nestjs/common';
+import { encryptPassword } from 'src/libs/bcrypt';
 
 @Controller('admin')
 export class AdminController {
@@ -56,13 +58,32 @@ export class AdminController {
   }
 
   @UseGuards(AuthGuard)
+  @Post('verify-password/:tlp')
+  async checkPassword(
+    @Param('tlp') tlp: string,
+    @Body() { password }: UpdateAdminPasswordDto,
+  ): Promise<any> {
+    /* ------------------ MENGAMBIL DATA LAMA ------------------ */
+    let oldData: Admin | null;
+    try {
+      oldData = await this.adminService.findOne({ where: { tlp } });
+    } catch {
+      throw new BadRequestException('Admin tidak ditemukan!');
+    }
+
+    const oldPassword: any = oldData?.password;
+    const result = bcrypt.compareSync(password, oldPassword);
+    return { result };
+  }
+
+  @UseGuards(AuthGuard)
   @Post()
   @UseInterceptors(FileInterceptor('foto'))
   async create(
     @Body() data: CreateAdminDto,
     @UploadedFile()
     foto: Express.Multer.File,
-  ): Promise<any> {
+  ): Promise<Admin> {
     let newData: any;
 
     /* ------------------ ADMIN TIDAK MENGUNGGAH FOTO ------------------ */
@@ -254,6 +275,12 @@ export class AdminController {
           throw new BadRequestException(`No. Tlp ${data.tlp} telah digunakan!`);
         }
       }
+    }
+
+    /* ------------------ ADMIN MERUBAH PASSWORD ------------------ */
+    if (data.password) {
+      // Enkripsi password
+      data.password = encryptPassword(data.password);
     }
 
     /* ------------------ ADMIN MERUBAH FOTO ------------------ */
