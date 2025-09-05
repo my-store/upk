@@ -1,3 +1,4 @@
+import AdminTemplatesSidebarReducer from './reducers/admin/admin.templates.sidebar.slice';
 import UserOnlineListReducer from './reducers/user/user.online-list.slice';
 import AdminUserListReducer from './reducers/admin/admin.user.list.slice';
 import AdminUserInsertReducer from './reducers/admin/user.insert.slice';
@@ -33,6 +34,7 @@ export const store = configureStore({
     admin_user_list: AdminUserListReducer,
     admin_user_insert: AdminUserInsertReducer,
     admin_sidebar: AdminSidebarReducer,
+    admin_templates_sidebar: AdminTemplatesSidebarReducer,
   },
 });
 

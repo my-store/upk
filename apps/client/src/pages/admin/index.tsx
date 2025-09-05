@@ -1,3 +1,4 @@
+import AdminSidebarUpdateProfile from './templates/sidebar/update-profile/admin.templates.sidebar.update-profile.image';
 import { adminListSetListData } from '../../libs/redux/reducers/admin/admin.list.slice';
 import { getLoginCredentials, refreshToken } from '../../libs/credentials';
 import { rootRemoveLoading } from '../../libs/redux/reducers/root.slice';
@@ -9,9 +10,9 @@ import AdminNavbar from './templates/navbar';
 import AdminUserInsert from './user/insert';
 import AdminUserList from './user';
 import AdminInsert from './insert';
+import AdminConfig from './config';
 import './admin.styles.main.scss';
 import { useEffect } from 'react';
-import AdminConfig from './config';
 
 export interface AdminGlobalStyleInterface {
   primaryColor: string;
@@ -101,7 +102,12 @@ function AdminGlobalTemplates({ children, socketConnect }: any) {
     <div className="Admin">
       <AdminNavbar globalStyle={globalStyle} />
       <AdminConfig globalStyle={globalStyle} />
+
+      {/* Sidebar */}
       <AdminSidebar globalStyle={globalStyle} />
+      <AdminSidebarUpdateProfile />
+
+      {/* Page */}
       {children}
     </div>
   );

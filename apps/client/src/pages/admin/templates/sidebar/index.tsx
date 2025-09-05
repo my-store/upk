@@ -1,11 +1,15 @@
+import {
+  adminTemplatesSidebarBoxOpen,
+  adminTemplatesSidebarOpen,
+} from '../../../../libs/redux/reducers/admin/admin.templates.sidebar.slice';
 import { adminSidebarSetAdminData } from '../../../../libs/redux/reducers/admin/admin.sidebar.slice';
 import { rootOpenLoading } from '../../../../libs/redux/reducers/root.slice';
 import { logout } from '../../../../libs/redux/reducers/login.slice';
 import type { RootState } from '../../../../libs/redux/store';
+import './styles/admin.templates.sidebar.styles.main.scss';
 import { useSelector, useDispatch } from 'react-redux';
 import type { AdminGlobalStyleInterface } from '../..';
 import { serverUrl, socket } from '../../../../App';
-import './styles/admin.sidebar.styles.main.scss';
 import { useNavigate } from 'react-router-dom';
 import { CiEdit } from 'react-icons/ci';
 import {
@@ -47,8 +51,13 @@ export default function AdminSidebar(props: AdminSidebarProps) {
     socket.disconnect();
   }
 
-  // SOON ...
-  function openUpdateFoto() {}
+  function openUpdateFoto() {
+    // Open update profile container
+    dispatch(adminTemplatesSidebarOpen(true));
+
+    // Open update profile box after 0.25 second (sesuai animation-duration dari container)
+    setTimeout(() => dispatch(adminTemplatesSidebarBoxOpen(true)), 250);
+  }
 
   useEffect(() => {
     load();
