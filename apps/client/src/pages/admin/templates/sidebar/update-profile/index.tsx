@@ -25,6 +25,7 @@ import {
   refreshToken,
   getUserData,
 } from '../../../../../libs/credentials';
+import type { CSSProperties } from 'react';
 
 interface AdminSidebarProps {
   globalStyle: AdminGlobalStyleInterface;
@@ -275,24 +276,55 @@ export default function AdminSidebarUpdateProfile(props: AdminSidebarProps) {
     socket.disconnect();
   }
 
+  function updateFoto(target: any) {
+    if (!target.files || target.files.length < 1) {
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      dispatch(adminTemplatesSidebarUpdateProfileFoto(evt.target?.result));
+    };
+    reader.readAsDataURL(target.files[0]);
+  }
+
+  function updateNewPassword(value: string) {
+    dispatch(adminTemplatesSidebarUpdateProfileNewPassword(value));
+  }
+
+  function updateOldPassword(value: string) {
+    dispatch(adminTemplatesSidebarUpdateProfileOldPassword(value));
+  }
+
+  function openInputFoto() {
+    const imageInput = $('#Admin-Sidebar-Update-Profile-Foto-Input')[0];
+    imageInput.click();
+  }
+
+  // ---------------- CONTAINER & BOX STATES ----------------
+  const { opened, boxOpened } = updateProfileState;
+
+  // ---------------- CONTAINER & BOX CLASSES ----------------
+  const containerClass: string = opened
+    ? 'Admin-Sidebar-Update-Profile Admin-Sidebar-Update-Profile-Active'
+    : 'Admin-Sidebar-Update-Profile';
+  const boxClass: string = boxOpened
+    ? 'Admin-Sidebar-Update-Profile-Box Admin-Sidebar-Update-Profile-Box-Active'
+    : 'Admin-Sidebar-Update-Profile-Box';
+
+  // ---------------- FOTO STYLES ----------------
+  const { foto } = updateProfileState;
+  const fotoBg: string = foto.length > 0 ? `url(${foto})` : '';
+  const fotoStyle: CSSProperties = { backgroundImage: fotoBg };
+
+  // ---------------- HEADER STYLES ----------------
+  const headerStyle: CSSProperties = { backgroundColor: primaryColor };
+
   return (
-    <div
-      className={
-        updateProfileState.opened
-          ? 'Admin-Sidebar-Update-Profile Admin-Sidebar-Update-Profile-Active'
-          : 'Admin-Sidebar-Update-Profile'
-      }
-    >
-      <div
-        className={
-          updateProfileState.boxOpened
-            ? 'Admin-Sidebar-Update-Profile-Box Admin-Sidebar-Update-Profile-Box-Active'
-            : 'Admin-Sidebar-Update-Profile-Box'
-        }
-      >
+    <div className={containerClass}>
+      <div className={boxClass}>
         <div
           className="Admin-Sidebar-Update-Profile-Header"
-          style={{ backgroundColor: primaryColor }}
+          style={headerStyle}
         >
           <p className="Admin-Sidebar-Update-Profile-Header-Text">
             Ubah Profile
@@ -331,11 +363,7 @@ export default function AdminSidebarUpdateProfile(props: AdminSidebarProps) {
             <input
               type="text"
               name="old-password"
-              onChange={(e) =>
-                dispatch(
-                  adminTemplatesSidebarUpdateProfileOldPassword(e.target.value),
-                )
-              }
+              onChange={({ target: { value } }) => updateOldPassword(value)}
             />
           </div>
 
@@ -345,11 +373,7 @@ export default function AdminSidebarUpdateProfile(props: AdminSidebarProps) {
             <input
               type="text"
               name="new-password"
-              onChange={(e) =>
-                dispatch(
-                  adminTemplatesSidebarUpdateProfileNewPassword(e.target.value),
-                )
-              }
+              onChange={({ target: { value } }) => updateNewPassword(value)}
             />
           </div>
 
@@ -359,33 +383,12 @@ export default function AdminSidebarUpdateProfile(props: AdminSidebarProps) {
               id="Admin-Sidebar-Update-Profile-Foto-Input"
               type="file"
               name="foto"
-              onChange={(e: any) => {
-                if (!e.target.files || e.target.files.length < 1) {
-                  return;
-                }
-                const reader = new FileReader();
-                reader.onload = (evt) => {
-                  dispatch(
-                    adminTemplatesSidebarUpdateProfileFoto(evt.target?.result),
-                  );
-                };
-                reader.readAsDataURL(e.target.files[0]);
-              }}
+              onChange={({ target }) => updateFoto(target)}
             />
             <div
               className="Admin-Sidebar-Update-Profile-Foto-Preview"
-              style={{
-                backgroundImage:
-                  updateProfileState.foto.length > 0
-                    ? `url(${updateProfileState.foto})`
-                    : '',
-              }}
-              onClick={() => {
-                const imageInput = $(
-                  '#Admin-Sidebar-Update-Profile-Foto-Input',
-                )[0];
-                imageInput.click();
-              }}
+              style={fotoStyle}
+              onClick={openInputFoto}
             >
               {updateProfileState.foto.length < 1 && (
                 <p className="Admin-Sidebar-Update-Profile-Foto-Label">

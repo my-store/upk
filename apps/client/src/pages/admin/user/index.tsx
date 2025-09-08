@@ -5,7 +5,10 @@ import {
   adminUserUpdateData,
   adminUserDeleteData,
 } from '../../../libs/redux/reducers/admin/admin.user.list.slice';
-import { setAdminConfigOpened } from '../../../libs/redux/reducers/admin/admin.config.slice';
+import {
+  adminConfigAdminOpened,
+  adminConfigUserOpened,
+} from '../../../libs/redux/reducers/admin/admin.config.slice';
 import { openAlert } from '../../../libs/redux/reducers/components.alert.slice';
 import { getLoginCredentials, refreshToken } from '../../../libs/credentials';
 import { JSONGet, JSONPatch } from '../../../libs/requests';
@@ -62,13 +65,15 @@ export default function AdminUserList() {
     const { access_token, data } = getLoginCredentials();
     const { maxDisplay } = config.list;
 
+    // --------------- URL ---------------
     let url: string = `/api/user/?take=${maxDisplay}`;
 
+    // --------------- ORDER STATEMENT ---------------
     if (config.list.shortByNew) {
       url += `&orderBy={"id": "desc"}`;
     }
 
-    /* ------------ STATUS ------------
+    /* ---------------------- WHERE STATEMENT ----------------------
     | 1 = Tampilkan semua
     | 2 = Tampilkan yang aktif saja
     | 3 = Tampilkan yang nonaktif saja
@@ -76,8 +81,10 @@ export default function AdminUserList() {
     const { display } = config.list;
     // Tidak menampilkan semua
     if (display != 1) {
-      // Ketika display=2, maka tampilkan active=true, dan sebaliknya.
-      url += `&where={"active": ${display != 3}}`;
+      let where: any = {
+        active: display != 3, // Ketika display=2, maka tampilkan active=true, dan sebaliknya.
+      };
+      url += `&where=${JSON.stringify(where)}`;
     }
 
     // Kirim request ke server (GET)
@@ -112,7 +119,6 @@ export default function AdminUserList() {
 
   /* ----------------- UPDATE DATA HANDLER -----------------
   |  1. Activate or Deactivate
-  |  2. Online or Offline
   */
   async function update(tlp: string, newData: any) {
     // Update is waiting
@@ -168,6 +174,10 @@ export default function AdminUserList() {
 
   useEffect(
     () => {
+      // Remove admin config
+      dispatch(adminConfigAdminOpened(false));
+
+      // Load data
       load();
     },
     // Ketika ada perubahan state dibawah ini, fungsi diatas akan dipanggil kembali
@@ -190,7 +200,7 @@ export default function AdminUserList() {
         <div className="User-List-Header-Button-Container">
           <button onClick={() => navigate('/admin/user/insert')}>Input</button>
           <p className="Admin-Navbar-Link-Sepataror">.</p>
-          <button onClick={() => dispatch(setAdminConfigOpened(true))}>
+          <button onClick={() => dispatch(adminConfigUserOpened(true))}>
             Pengaturan
           </button>
         </div>

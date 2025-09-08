@@ -1,12 +1,27 @@
 import type { ActionInterface } from '../../store';
 import { createSlice } from '@reduxjs/toolkit';
 
-export interface UserListDisplayInterface {
+export interface SelectOptionInterface {
   label: string;
   value: any;
 }
 
-export const UserListDisplayItems: UserListDisplayInterface[] = [
+export const AdminConfigUserListDisplayItems: SelectOptionInterface[] = [
+  {
+    label: 'Semua',
+    value: 1,
+  },
+  {
+    label: 'Aktif',
+    value: 2,
+  },
+  {
+    label: 'Nonaktif',
+    value: 3,
+  },
+];
+
+export const AdminConfigAdminListDisplayItems: SelectOptionInterface[] = [
   {
     label: 'Semua',
     value: 1,
@@ -34,19 +49,49 @@ interface UserInsertConfigInterface {
   autoActivate: boolean;
 }
 
+interface AdminListConfigInterface {
+  ready: boolean;
+  display: number;
+  shortByNew: boolean;
+  maxDisplay: number;
+  maxLoadMore: number;
+  maxSearchDisplay: number;
+}
+
+interface AdminInsertConfigInterface {}
+
 export interface UserConfigInterface {
+  opened: boolean;
   list: UserListConfigInterface;
   insert: UserInsertConfigInterface;
 }
 
-interface DefaultAdminConfigInterface {
+export interface AdminConfigInterface {
   opened: boolean;
+  list: AdminListConfigInterface;
+  insert: AdminInsertConfigInterface;
+}
+
+interface DefaultAdminConfigInterface {
+  admin: AdminConfigInterface;
   user: UserConfigInterface;
 }
 
 export const DefaultAdminConfigState: DefaultAdminConfigInterface = {
-  opened: false,
+  admin: {
+    opened: false,
+    list: {
+      ready: false,
+      display: 1, // Default = Tampilkan semua admin (kecuali saya pastinya)
+      shortByNew: true,
+      maxDisplay: 50,
+      maxLoadMore: 15,
+      maxSearchDisplay: 50,
+    },
+    insert: {}, // Pending ...
+  },
   user: {
+    opened: false,
     list: {
       ready: false,
       display: 1, // Default = Tampilkan semua user
@@ -61,56 +106,109 @@ export const DefaultAdminConfigState: DefaultAdminConfigInterface = {
   },
 };
 
-function SetAdminConfigOpenedHandler(
+// ADMIN CONFIG
+
+function ConfigAdminOpenedHandler(
   state: DefaultAdminConfigInterface,
   action: ActionInterface,
 ) {
-  state.opened = action.payload;
+  state.admin.opened = action.payload;
 }
 
-function SetUserListReadyHandler(
+function ConfigAdminListReadyHandler(
+  state: DefaultAdminConfigInterface,
+  action: ActionInterface,
+) {
+  state.admin.list.ready = action.payload;
+}
+
+function ConfigAdminListDisplayHandler(
+  state: DefaultAdminConfigInterface,
+  action: ActionInterface,
+) {
+  state.admin.list.display = action.payload;
+}
+
+function ConfigAdminListMaxSearchDisplayHandler(
+  state: DefaultAdminConfigInterface,
+  action: ActionInterface,
+) {
+  state.admin.list.maxSearchDisplay = action.payload;
+}
+
+function ConfigAdminListMaxLoadMoreHandler(
+  state: DefaultAdminConfigInterface,
+  action: ActionInterface,
+) {
+  state.admin.list.maxLoadMore = action.payload;
+}
+
+function ConfigAdminListMaxDisplayHandler(
+  state: DefaultAdminConfigInterface,
+  action: ActionInterface,
+) {
+  state.admin.list.maxDisplay = action.payload;
+}
+
+function ConfigAdminListShortByNewHandler(
+  state: DefaultAdminConfigInterface,
+  action: ActionInterface,
+) {
+  state.admin.list.shortByNew = action.payload;
+}
+
+// USER CONFIG
+
+function ConfigUserOpenedHandler(
+  state: DefaultAdminConfigInterface,
+  action: ActionInterface,
+) {
+  state.user.opened = action.payload;
+}
+
+function ConfigUserListReadyHandler(
   state: DefaultAdminConfigInterface,
   action: ActionInterface,
 ) {
   state.user.list.ready = action.payload;
 }
 
-function SetUserListDisplayHandler(
+function ConfigUserListDisplayHandler(
   state: DefaultAdminConfigInterface,
   action: ActionInterface,
 ) {
   state.user.list.display = action.payload;
 }
 
-function SetUserListShortByNewHandler(
+function ConfigUserListShortByNewHandler(
   state: DefaultAdminConfigInterface,
   action: ActionInterface,
 ) {
   state.user.list.shortByNew = action.payload;
 }
 
-function SetUserListMaxDisplayHandler(
+function ConfigUserListMaxDisplayHandler(
   state: DefaultAdminConfigInterface,
   action: ActionInterface,
 ) {
   state.user.list.maxDisplay = action.payload;
 }
 
-function SetUserListMaxLoadMoreHandler(
+function ConfigUserListMaxLoadMoreHandler(
   state: DefaultAdminConfigInterface,
   action: ActionInterface,
 ) {
   state.user.list.maxLoadMore = action.payload;
 }
 
-function SetUserListMaxSearchDisplayHandler(
+function ConfigUserListMaxSearchDisplayHandler(
   state: DefaultAdminConfigInterface,
   action: ActionInterface,
 ) {
   state.user.list.maxSearchDisplay = action.payload;
 }
 
-function SetUserInsertAutoActivate(
+function ConfigUserInsertAutoActivateHandler(
   state: DefaultAdminConfigInterface,
   action: ActionInterface,
 ) {
@@ -121,25 +219,46 @@ const AdminConfigSlice = createSlice({
   name: 'admin.config',
   initialState: DefaultAdminConfigState,
   reducers: {
-    setAdminConfigOpened: SetAdminConfigOpenedHandler,
-    adminConfigSetUserInsertAutoActivate: SetUserInsertAutoActivate,
-    setUserListMaxDisplay: SetUserListMaxDisplayHandler,
-    setUserListMaxLoadMore: SetUserListMaxLoadMoreHandler,
-    setUserListMaxSearchDisplay: SetUserListMaxSearchDisplayHandler,
-    setUserListShortByNew: SetUserListShortByNewHandler,
-    setUserListDisplay: SetUserListDisplayHandler,
-    setUserListReady: SetUserListReadyHandler,
+    /* ----------------- USER CONFIG ----------------- */
+    adminConfigUserOpened: ConfigUserOpenedHandler,
+    adminConfigUserInsertAutoActivate: ConfigUserInsertAutoActivateHandler,
+    adminConfigUserListMaxDisplay: ConfigUserListMaxDisplayHandler,
+    adminConfigUserListMaxLoadMore: ConfigUserListMaxLoadMoreHandler,
+    adminConfigUserListMaxSearchDisplay: ConfigUserListMaxSearchDisplayHandler,
+    adminConfigUserListShortByNew: ConfigUserListShortByNewHandler,
+    adminConfigUserListDisplay: ConfigUserListDisplayHandler,
+    adminConfigUserListReady: ConfigUserListReadyHandler,
+
+    /* ----------------- ADMIN CONFIG ----------------- */
+    adminConfigAdminOpened: ConfigAdminOpenedHandler,
+    adminConfigAdminListMaxDisplay: ConfigAdminListMaxDisplayHandler,
+    adminConfigAdminListMaxLoadMore: ConfigAdminListMaxLoadMoreHandler,
+    adminConfigAdminListMaxSearchDisplay:
+      ConfigAdminListMaxSearchDisplayHandler,
+    adminConfigAdminListShortByNew: ConfigAdminListShortByNewHandler,
+    adminConfigAdminListDisplay: ConfigAdminListDisplayHandler,
+    adminConfigAdminListReady: ConfigAdminListReadyHandler,
   },
 });
 
 export const {
-  setAdminConfigOpened,
-  adminConfigSetUserInsertAutoActivate,
-  setUserListMaxDisplay,
-  setUserListMaxLoadMore,
-  setUserListMaxSearchDisplay,
-  setUserListShortByNew,
-  setUserListDisplay,
-  setUserListReady,
+  /* ----------------- USER CONFIG ----------------- */
+  adminConfigUserOpened,
+  adminConfigUserInsertAutoActivate,
+  adminConfigUserListMaxDisplay,
+  adminConfigUserListMaxLoadMore,
+  adminConfigUserListMaxSearchDisplay,
+  adminConfigUserListShortByNew,
+  adminConfigUserListDisplay,
+  adminConfigUserListReady,
+
+  /* ----------------- ADMIN CONFIG ----------------- */
+  adminConfigAdminOpened,
+  adminConfigAdminListMaxDisplay,
+  adminConfigAdminListMaxLoadMore,
+  adminConfigAdminListMaxSearchDisplay,
+  adminConfigAdminListShortByNew,
+  adminConfigAdminListDisplay,
+  adminConfigAdminListReady,
 } = AdminConfigSlice.actions;
 export default AdminConfigSlice.reducer;

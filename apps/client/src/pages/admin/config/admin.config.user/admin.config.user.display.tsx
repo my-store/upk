@@ -1,24 +1,24 @@
 import {
-  UserListDisplayItems,
-  setUserListDisplay,
+  AdminConfigUserListDisplayItems,
+  adminConfigUserListDisplay,
 } from '../../../../libs/redux/reducers/admin/admin.config.slice';
 import type { RootState } from '../../../../libs/redux/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateUserConfig } from '.';
 import { getAdminConfig } from '..';
 
-export default function AdminUserDisplayConfig() {
+export default function AdminConfigUserDisplay() {
   const state = useSelector((state: RootState) => state.admin_config.user);
   const dispatch = useDispatch();
 
   return (
-    <div className="Admin-User-Config-Data">
-      <p className="Admin-User-Config-Data-Label">Tampilkan</p>
+    <div className="Admin-Config-User-Data">
+      <p className="Admin-Config-User-Data-Label">Tampilkan</p>
       <select
         name="active"
         defaultValue={state.list.display}
         onChange={({ target }) => {
-          dispatch(setUserListDisplay(parseInt(target.value)));
+          dispatch(adminConfigUserListDisplay(parseInt(target.value)));
 
           // User > list > display | Update localstorage
           const userConfig: any = getAdminConfig('user');
@@ -30,7 +30,7 @@ export default function AdminUserDisplayConfig() {
           });
         }}
       >
-        {UserListDisplayItems.map((itm, itmx) => (
+        {AdminConfigUserListDisplayItems.map((itm, itmx) => (
           <option key={itmx} value={itm.value}>
             {itm.label}
           </option>

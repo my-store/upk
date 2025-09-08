@@ -1,4 +1,4 @@
-import { adminConfigSetUserInsertAutoActivate } from '../../../../libs/redux/reducers/admin/admin.config.slice';
+import { adminConfigUserInsertAutoActivate } from '../../../../libs/redux/reducers/admin/admin.config.slice';
 import { openAlert } from '../../../../libs/redux/reducers/components.alert.slice';
 import {
   userInsertSetPassword,
@@ -176,7 +176,7 @@ export default function UserInsert() {
               name="active"
               checked={configState.autoActivate}
               onChange={({ target: { checked } }) =>
-                dispatch(adminConfigSetUserInsertAutoActivate(checked))
+                dispatch(adminConfigUserInsertAutoActivate(checked))
               }
             />
           </div>
